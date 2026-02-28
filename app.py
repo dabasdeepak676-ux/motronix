@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from flask_wtf import CSRFProtect
@@ -125,14 +126,13 @@ def home():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form['username']
-        raw_password = request.form['password']
+        username = request.form["username"]
+        raw_password = request.form["password"]
 
-        from werkzeug.security import generate_password_hash
-
-hashed_password = generate_password_hash(raw_password)
+        hashed_password = generate_password_hash(raw_password)
 
         new_user = User(username=username, password=hashed_password)
+
         db.session.add(new_user)
         db.session.commit()
 
@@ -149,11 +149,7 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-       from werkzeug.security import check_password_hash
-
-from werkzeug.security import check_password_hash
-
-if user and check_password_hash(user.password, password):
+        if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect("/community")
         else:
