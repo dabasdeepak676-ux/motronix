@@ -2,13 +2,16 @@ from flask import Flask, render_template, request, redirect, flash, url_for, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
+from flask_bcrypt import Bcrypt
+from flask_wtf import CSRFProtect
 import os
 from collections import defaultdict
 import re
 
 app = Flask(__name__)
-
-app.config["SECRET_KEY"] = "secret"
+bcrypt = Bcrypt(app)
+csrf = CSRFProtect(app)
+app.config["SECRET_KEY"] = "motronix-super-secure-2026"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -60,7 +63,8 @@ KNOWLEDGE_BASE = {
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), default="user")
 
 
 class Category(db.Model):
@@ -123,17 +127,15 @@ def home():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        existing = User.query.filter_by(username=request.form["username"]).first()
-        if existing:
-            flash("Username already exists")
-            return redirect("/register")
+        username = request.form['username']
+        raw_password = request.form['password']
 
-        user = User(
-            username=request.form["username"],
-            password=request.form["password"]
-        )
-        db.session.add(user)
+        hashed_password = bcrypt.generate_password_hash(raw_password).decode('utf-8')
+
+        new_user = User(username=username, password=hashed_password)
+        db.session.add(new_user)
         db.session.commit()
+
         return redirect("/login")
 
     return render_template("auth.html")
@@ -142,14 +144,24 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        user = User.query.filter_by(username=request.form["username"]).first()
-        if user and user.password == request.form["password"]:
+        username = request.form["username"]
+        password = request.form["password"]
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and bcrypt.check_password_hash(user.password, password):
             login_user(user)
             return redirect("/community")
         else:
             flash("Invalid credentials")
 
     return render_template("auth.html")
+@app.route("/make-admin")
+def make_admin():
+    user = User.query.first()
+    user.role = "admin"
+    db.session.commit()
+    return "Admin assigned"
 
 
 @app.route("/logout")
@@ -198,7 +210,7 @@ def post_detail(post_id):
 def edit_post(post_id):
     post = Post.query.get_or_404(post_id)
 
-    if post.user_id != current_user.id and current_user.id != 1:
+    if post.user_id != current_user.id and current_user.role != "admin":
         return "Unauthorized"
 
     if request.method == "POST":
@@ -215,7 +227,7 @@ def edit_post(post_id):
 def delete_post(post_id):
     post = Post.query.get_or_404(post_id)
 
-    if post.user_id != current_user.id and current_user.id != 1:
+    if post.user_id != current_user.id and current_user.role != "admin":
         return "Unauthorized"
 
     db.session.delete(post)

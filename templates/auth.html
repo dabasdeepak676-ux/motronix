@@ -34,19 +34,27 @@
             {% endif %}
         {% endwith %}
 
-        <!-- Form -->
-        <form method="POST">
+        <!-- AUTH FORM -->
+        <form method="POST" autocomplete="off">
+            
+            <!-- CSRF Token (Required) -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+            <!-- Username -->
             <input type="text"
                    name="username"
                    placeholder="Username"
-                   required>
+                   required
+                   autocomplete="username">
 
+            <!-- Password -->
             <input type="password"
                    name="password"
                    placeholder="Password"
-                   required>
+                   required
+                   autocomplete="current-password">
 
+            <!-- Submit Button -->
             {% if request.path == "/login" %}
                 <button type="submit" class="auth-btn">
                     Login
