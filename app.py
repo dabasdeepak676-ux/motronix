@@ -376,11 +376,10 @@ Inspection karwana better hai.
     })
 # ================= INIT =================
 
-if __name__ == "__main__":
+iif __name__ == "__main__":
     with app.app_context():
-        db.drop_all()      # 👈 TEMP reset
-        db.create_all()    # recreate tables
-    app.run(debug=True)
+        db.drop_all()   # TEMP reset (remove later)
+        db.create_all()
 
         # Create default categories if not exist
         if Category.query.count() == 0:
@@ -398,5 +397,5 @@ if __name__ == "__main__":
 
             db.session.commit()
 
-    app.run(debug=True, host="127.0.0.1", port=5500)
+    app.run(debug=True, host="0.0.0.0", port=10000)
     
