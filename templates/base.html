@@ -11,14 +11,16 @@
 <!-- ================= NAVBAR ================= -->
 <nav class="navbar">
     <div class="nav-left">
-      <a href="/" class="logo">⚙️ Motronix</a>
+      <a href="/" class="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" height="32">
+</a>
     </div>
 
     <div class="nav-center">
         <a href="/">Home</a>
         <a href="/community">Community</a>
         <a href="/news">News</a>
-        <a href="/handbook">Handbook</a>
+        <!-- <a href="/handbook">Handbook</a> -->
         <a href="/videos">Videos</a>
     </div>
 
@@ -228,6 +230,17 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+<footer class="site-footer">
+    <p>Powered by <strong>Speed16</strong></p>
 
+    <div>
+        <a href="https://youtube.com/YOUR_LINK" target="_blank">YouTube</a> |
+        <a href="https://instagram.com/YOUR_LINK" target="_blank">Instagram</a>
+    </div>
+
+    <p style="margin-top:10px; font-size:13px;">
+        Founded by Ritesh – Engineer & Automotive Influencer.
+    </p>
+</footer>
 </body>
 </html>
