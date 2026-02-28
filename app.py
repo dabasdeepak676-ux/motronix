@@ -2,14 +2,12 @@ from flask import Flask, render_template, request, redirect, flash, url_for, jso
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
-from flask_bcrypt import Bcrypt
 from flask_wtf import CSRFProtect
 import os
 from collections import defaultdict
 import re
 
 app = Flask(__name__)
-bcrypt = Bcrypt(app)
 csrf = CSRFProtect(app)
 app.config["SECRET_KEY"] = "motronix-super-secure-2026"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -130,7 +128,9 @@ def register():
         username = request.form['username']
         raw_password = request.form['password']
 
-        hashed_password = bcrypt.generate_password_hash(raw_password).decode('utf-8')
+        from werkzeug.security import generate_password_hash
+
+hashed_password = generate_password_hash(raw_password)
 
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
@@ -149,7 +149,11 @@ def login():
 
         user = User.query.filter_by(username=username).first()
 
-        if user and bcrypt.check_password_hash(user.password, password):
+       from werkzeug.security import check_password_hash
+
+from werkzeug.security import check_password_hash
+
+if user and check_password_hash(user.password, password):
             login_user(user)
             return redirect("/community")
         else:
