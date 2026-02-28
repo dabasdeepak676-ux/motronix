@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Motronix - Automotive Intelligence Simplified</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="mouse-light"></div>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar">
+    <div class="nav-left">
+      <a href="/" class="logo">⚙️ Motronix</a>
+    </div>
+
+    <div class="nav-center">
+        <a href="/">Home</a>
+        <a href="/community">Community</a>
+        <a href="/news">News</a>
+        <a href="/handbook">Handbook</a>
+        <a href="/videos">Videos</a>
+    </div>
+
+    <div class="nav-right">
+
+   {% if current_user.is_authenticated %}
+
+            <div class="nav-profile-wrapper">
+                <div class="nav-profile">
+                    <div class="profile-badge">
+                        {{ current_user.username[0] | upper }}
+                    </div>
+                    <span class="profile-name">
+                        {{ current_user.username }}
+                    </span>
+                </div>
+
+                <a href="/logout" class="nav-btn">Logout</a>
+            </div>
+
+        {% else %}
+
+            {% if request.path == "/login" %}
+                <a href="/register" class="nav-btn">Register</a>
+
+            {% elif request.path == "/register" %}
+                <a href="/login" class="nav-btn">Login</a>
+
+            {% else %}
+                <a href="/login" class="nav-btn">Login</a>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+</nav>
+
+<!-- ================= MAIN CONTENT ================= -->
+<div class="main-container">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- ================= AI FLOATING BUTTON ================= -->
+
+{% if current_user.is_authenticated %}
+
+<div class="ai-orb" onclick="toggleAI()">
+    <span class="ai-text">AI</span>
+</div>
+
+<div class="ai-chatbox" id="aiBox">
+    <div class="ai-header">
+      Motronix AI
+        <span style="cursor:pointer;" onclick="toggleAI()">✖</span>
+    </div>
+
+    <div class="ai-messages" id="aiMessages">
+        <div class="ai-message">
+            Hi 👋 I’m your Motronix Car Assistant.
+Ask anything about buying, service, engine, EV or scams.
+        </div>
+    </div>
+
+    <div class="ai-input-area">
+        <input type="text" id="aiInput" placeholder="Ask something..." />
+        <button onclick="sendAI()">Send</button>
+    </div>
+</div>
+
+{% else %}
+
+<!-- Guest View AI -->
+<div class="ai-orb disabled-ai" onclick="redirectToLogin()">
+    <span class="ai-text">AI</span>
+</div>
+
+{% endif %}
+
+<!-- ================= FUTURISTIC AI ORB ================= -->
+
+{% if current_user.is_authenticated %}
+
+<div class="ai-orb" onclick="toggleAI()">
+    <span class="ai-text">AI</span>
+</div>
+
+<div class="ai-chatbox" id="aiBox">
+    <div class="ai-header">
+        AutoHive AI
+        <span style="cursor:pointer;" onclick="toggleAI()">✖</span>
+    </div>
+
+    <div class="ai-messages" id="aiMessages">
+        <div class="ai-message">
+            Hi 👋 Ask me anything about cars!
+        </div>
+    </div>
+
+    <div class="ai-input-area">
+        <input type="text" id="aiInput" placeholder="Ask something..." />
+        <button onclick="sendAI()">Send</button>
+    </div>
+</div>
+
+{% endif %}
+
+<!-- ================= SCRIPTS ================= -->
+
+<script>
+function redirectToLogin() {
+    alert("Login to unlock AutoHive AI 🚗");
+    window.location.href = "/login";
+}
+</script>   
+const light = document.querySelector('.mouse-light');
+
+document.addEventListener('mousemove', (e) => {
+    light.style.left = e.clientX + 'px';
+    light.style.top = e.clientY + 'px';
+});
+</script>
+
+<script>
+function toggleAI() {
+    const box = document.getElementById("aiBox");
+    box.classList.toggle("show-ai");
+}
+
+async function sendAI() {
+    document.getElementById("aiInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        sendAI();
+    }
+});
+    const input = document.getElementById("aiInput");
+    const button = document.querySelector(".ai-input-area button");
+button.disabled = true;
+button.style.opacity = "0.6";
+    const messages = document.getElementById("aiMessages");
+
+    if (!input || input.value.trim() === "") return;
+
+    const userText = input.value;
+
+    // User message
+    const userMsg = document.createElement("div");
+    userMsg.className = "ai-user-message";
+    userMsg.innerText = userText;
+    messages.appendChild(userMsg);
+
+    input.value = "";
+
+    // Typing message
+    const botMsg = document.createElement("div");
+    botMsg.className = "ai-message";
+    botMsg.innerHTML = `
+        <div class="typing">
+            <span></span><span></span><span></span>
+        </div>
+    `;
+    messages.appendChild(botMsg);
+
+    messages.scrollTop = messages.scrollHeight;
+
+    try {
+        const response = await fetch("/ask-ai", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: userText })
+        });
+
+        const data = await response.json();
+
+        // small delay for typing effect
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        botMsg.innerText = data.reply;
+        button.disabled = false;
+button.style.opacity = "1";
+
+    } catch (error) {
+        botMsg.innerText = "AI temporarily unavailable.";
+    }
+    button.disabled = false;
+button.style.opacity = "1";
+
+    messages.scrollTop = messages.scrollHeight;
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sections = document.querySelectorAll(".fade-section");
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+            }
+        });
+    }, { threshold: 0.2 });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+});
+</script>
+
+</body>
+</html>

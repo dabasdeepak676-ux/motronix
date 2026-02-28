@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-wrapper">
+
+    <div class="auth-card">
+
+        <!-- Switch Button -->
+        <div class="auth-top-switch">
+            {% if request.path == "/login" %}
+                <a href="/register">Create Account →</a>
+            {% else %}
+                <a href="/login">← Back to Login</a>
+            {% endif %}
+        </div>
+
+        <!-- Title -->
+        {% if request.path == "/login" %}
+            <h2>Welcome Back</h2>
+            <p class="auth-sub">Sign in to continue</p>
+        {% else %}
+            <h2>Create Account</h2>
+            <p class="auth-sub">Join the community</p>
+        {% endif %}
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="auth-flash">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form -->
+        <form method="POST">
+
+            <input type="text"
+                   name="username"
+                   placeholder="Username"
+                   required>
+
+            <input type="password"
+                   name="password"
+                   placeholder="Password"
+                   required>
+
+            {% if request.path == "/login" %}
+                <button type="submit" class="auth-btn">
+                    Login
+                </button>
+            {% else %}
+                <button type="submit" class="auth-btn">
+                    Register
+                </button>
+            {% endif %}
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

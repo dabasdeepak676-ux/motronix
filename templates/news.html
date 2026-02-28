@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+
+    <h1>Latest Automotive News</h1>
+
+    {% if current_user.is_authenticated and current_user.id == 1 %}
+        <a href="{{ url_for('create_news') }}" class="create-btn">
+            + Create News
+        </a>
+    {% endif %}
+
+</div>
+
+{% if news_items %}
+    {% for news in news_items %}
+        <div class="post-card">
+
+            <h2>
+                {% if news.image %}
+    <img src="{{ url_for('static', filename='news_images/' + news.image) }}"
+         style="width:100%; border-radius:8px; margin:15px 0;">
+{% endif %}
+                <a href="{{ url_for('news_detail', news_id=news.id) }}" 
+                   style="color:white; text-decoration:none;">
+                    {{ news.title }}
+                </a>
+            </h2>
+
+            <p style="color:#aaa; font-size:14px;">
+                {{ news.created_at.strftime("%d %b %Y") }}
+            </p>
+
+            <p style="color:#ccc;">
+                {{ news.content[:180] }}...
+            </p>
+
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No news published yet.</p>
+{% endif %}
+
+{% endblock %}
