@@ -30,6 +30,18 @@ body {
     color: #ff3b3b;
     text-decoration: none;
 }
+.navbar-logo img {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+}
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 40px;
+}
+
 
 .nav-center {
     display: flex;
@@ -1080,14 +1092,7 @@ transition: transform 0.2s ease, box-shadow 0.3s ease;
     padding: 25px 20px;
     margin-top: 40px;
 }
-/* ===== NAV LOGO CLEAN ===== */
 
-.nav-logo {
-    height: 60px;
-    width: auto;          /* width auto rakho */
-    object-fit: contain;  /* stretch na ho */
-    display: block;
-}
 /* ===== FUTURISTIC BRAND STRIP ===== */
 
 .brand-strip {
