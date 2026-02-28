@@ -376,7 +376,7 @@ Inspection karwana better hai.
     })
 # ================= INIT =================
 
-iif __name__ == "__main__":
+if __name__ == "__main__":
     with app.app_context():
         db.drop_all()   # TEMP reset (remove later)
         db.create_all()
