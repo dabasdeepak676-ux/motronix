@@ -125,18 +125,26 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    if request.method == "POST":
-        username = request.form["username"]
-        raw_password = request.form["password"]
+   if request.method == "POST":
+    username = request.form['username']
+    raw_password = request.form['password']
 
-        hashed_password = generate_password_hash(raw_password)
+    from werkzeug.security import generate_password_hash
+    hashed_password = generate_password_hash(raw_password)
 
-        new_user = User(username=username, password=hashed_password)
+    # 🔥 CHECK IF USER EXISTS
+    existing_user = User.query.filter_by(username=username).first()
 
-        db.session.add(new_user)
-        db.session.commit()
+    if existing_user:
+        flash("Username already exists. Please choose another.")
+        return redirect("/register")
 
-        return redirect("/login")
+    new_user = User(username=username, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    flash("Account created successfully. Please login.")
+    return redirect("/login")
 
     return render_template("auth.html")
 
@@ -370,7 +378,9 @@ Inspection karwana better hai.
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        db.drop_all()      # 👈 TEMP reset
+        db.create_all()    # recreate tables
+    app.run(debug=True)
 
         # Create default categories if not exist
         if Category.query.count() == 0:
