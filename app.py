@@ -21,6 +21,8 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 db = SQLAlchemy(app)
+with app.app_context():
+    db.create_all()
 
 conversation_memory = defaultdict(list)
 
