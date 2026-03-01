@@ -195,8 +195,8 @@ def create():
         db.session.add(post)
         db.session.commit()
         return redirect("/community")
-    
-return render_template("create.html")
+
+    return render_template("create.html")
 
 @app.route("/post/<int:post_id>")
 def post_detail(post_id):
@@ -366,10 +366,48 @@ Inspection karwana better hai.
         "reply": "Buying, service, engine ya EV ke baare me pooch sakte ho."
     })
 
+# ================= EDIT COMMENT =================
+
+@app.route("/comment/<int:comment_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    if comment.user_id != current_user.id and current_user.role != "admin":
+        return "Unauthorized"
+
+    if request.method == "POST":
+        comment.content = request.form["content"]
+        db.session.commit()
+        return redirect(url_for("post_detail", post_id=comment.post_id))
+
+    return render_template("edit_comment.html", comment=comment)
+
+
+# ================= DELETE COMMENT =================
+
+@app.route("/comment/<int:comment_id>/delete", methods=["POST"])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    if comment.user_id != current_user.id and current_user.role != "admin":
+        return "Unauthorized"
+
+    post_id = comment.post_id
+    db.session.delete(comment)
+    db.session.commit()
+
+    return redirect(url_for("post_detail", post_id=post_id))
+
+
+# ================= DB INIT =================
+
 with app.app_context():
     db.create_all()
 
-# ================= INIT =================
+
+# ================= START SERVER =================
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

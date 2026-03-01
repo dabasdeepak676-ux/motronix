@@ -10,8 +10,6 @@
 
         <form method="POST" autocomplete="off">
 
-            <!-- CSRF Token (Required) -->
-
             <!-- Title -->
             <input type="text"
                    name="title"
@@ -24,15 +22,6 @@
                       rows="6"
                       required></textarea>
 
-            <!-- Category -->
-            <select name="category" required>
-                <option value="">Select Category</option>
-                {% for category in categories %}
-                    <option value="{{ category.id }}">
-                        {{ category.name }}
-                    </option>
-                {% endfor %}
-            </select>
 
             <!-- Submit -->
             <button type="submit" class="publish-btn">

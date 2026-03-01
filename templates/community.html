@@ -7,16 +7,6 @@
 
 <form method="GET" action="{{ url_for('community') }}" class="filter-bar">
 
-    <select name="category">
-        <option value="">All Categories</option>
-        {% for category in categories %}
-            <option value="{{ category.id }}"
-                {% if selected_category and selected_category|int == category.id %}selected{% endif %}>
-                {{ category.name }}
-            </option>
-        {% endfor %}
-    </select>
-
     <input type="text"
            name="search"
            placeholder="Search posts..."
@@ -25,12 +15,12 @@
     <button type="submit">Search</button>
 
     <div style="margin-top:15px;">
-        <a href="{{ url_for('community') }}?category={{ selected_category or '' }}&search={{ search_query or '' }}&sort=new"
+        <a href="{{ url_for('community') }}?search={{ search_query or '' }}&sort=new"
            class="sort-btn {% if not sort or sort == 'new' %}active-sort{% endif %}">
             New
         </a>
 
-        <a href="{{ url_for('community') }}?category={{ selected_category or '' }}&search={{ search_query or '' }}&sort=popular"
+        <a href="{{ url_for('community') }}?search={{ search_query or '' }}&sort=popular"
            class="sort-btn {% if sort == 'popular' %}active-sort{% endif %}">
             Popular
         </a>
@@ -40,53 +30,49 @@
 
 {% if posts %}
     {% for post in posts %}
-<div class="post-card">
+        <div class="post-card">
 
-    <!-- Header -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <div style="font-size:14px;">
-            <span style="color:#ff3b3b; font-weight:600;">
-                {{ post.author.username }}
-            </span>
-            <span style="color:#666;">
-                • {{ post.category.name }}
-            </span>
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="font-size:14px;">
+                    <span style="color:#ff3b3b; font-weight:600;">
+                        {{ post.author.username }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <h2 style="margin:6px 0 10px 0; font-size:20px; font-weight:600;">
+                <a href="{{ url_for('post_detail', post_id=post.id) }}"
+                   style="color:white; text-decoration:none;">
+                    {{ post.title }}
+                </a>
+            </h2>
+
+            <!-- Preview -->
+            <p style="color:#aaa; font-size:14px; line-height:1.6;">
+                {{ post.content[:180] }}...
+            </p>
+
+            <!-- Divider -->
+            <div style="height:1px; background:#222; margin:15px 0;"></div>
+
+            <!-- Actions -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+
+                <a href="{{ url_for('upvote', post_id=post.id) }}"
+                   class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('user_id','equalto',current_user.id)|list|length > 0 %}voted{% endif %}">
+                    🔥 {{ post.votes|length }}
+                </a>
+
+                <a href="{{ url_for('post_detail', post_id=post.id) }}"
+                   style="color:#888; text-decoration:none; font-size:14px;">
+                    💬 {{ post.comments|length }} replies
+                </a>
+
+            </div>
+
         </div>
-    </div>
-
-    <!-- Title -->
-    <h2 style="margin:6px 0 10px 0; font-size:20px; font-weight:600;">
-        <a href="{{ url_for('post_detail', post_id=post.id) }}"
-           style="color:white; text-decoration:none;">
-            {{ post.title }}
-        </a>
-    </h2>
-
-    <!-- Preview -->
-    <p style="color:#aaa; font-size:14px; line-height:1.6;">
-        {{ post.content[:180] }}...
-    </p>
-
-    <!-- Divider -->
-    <div style="height:1px; background:#222; margin:15px 0;"></div>
-
-    <!-- Actions -->
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-
-        <a href="{{ url_for('upvote', post_id=post.id) }}"
-           class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('user_id','equalto',current_user.id)|list|length > 0 %}voted{% endif %}">
-            🔥 {{ post.votes|length }}
-        </a>
-
-        <a href="{{ url_for('post_detail', post_id=post.id) }}"
-           style="color:#888; text-decoration:none; font-size:14px;">
-            💬 {{ post.comments|length }} replies
-        </a>
-
-    </div>
-
-</div>
-
     {% endfor %}
 {% else %}
     <p>No posts yet.</p>
