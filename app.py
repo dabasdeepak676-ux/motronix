@@ -66,7 +66,6 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="user")
 
 
-class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
 
@@ -77,10 +76,8 @@ class Post(db.Model):
     content = db.Column(db.Text, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
     author = db.relationship("User", backref="posts")
-    category = db.relationship("Category", backref="posts")
     comments = db.relationship("Comment", backref="post", cascade="all, delete")
     votes = db.relationship("Vote", backref="post", cascade="all, delete")
 
@@ -187,29 +184,26 @@ def logout():
 @app.route("/community")
 def community():
     posts = Post.query.order_by(Post.id.desc()).all()
-    categories = Category.query.all()
-    return render_template("community.html", posts=posts, categories=categories)
+    return render_template("community.html", posts=posts)
 
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
-    categories = Category.query.all()
 
     if request.method == "POST":
         post = Post(
             title=request.form["title"],
             content=request.form["content"],
             user_id=current_user.id,
-            category_id=int(request.form["category"])
         )
         db.session.add(post)
         db.session.commit()
         return redirect("/community")
 
-    return render_template("create.html", categories=categories)
+    return render_template("create.html")
 
-
+return render_template("create.html")
 @app.route("/post/<int:post_id>")
 def post_detail(post_id):
     post = Post.query.get_or_404(post_id)
