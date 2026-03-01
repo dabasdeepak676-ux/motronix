@@ -21,8 +21,6 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 db = SQLAlchemy(app)
-with app.app_context():
-    db.create_all()
 
 conversation_memory = defaultdict(list)
 
@@ -380,24 +378,10 @@ Inspection karwana better hai.
         "reply": "Buying, service, engine ya EV ke baare me pooch sakte ho."
     })
 
+with app.app_context():
+    db.create_all()
+    
 # ================= INIT =================
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-        if Category.query.count() == 0:
-            default_categories = [
-                "Maintenance",
-                "Buying Advice",
-                "EV Discussion",
-                "Modification",
-                "Insurance",
-                "General Discussion"
-            ]
-
-            for name in default_categories:
-                db.session.add(Category(name=name))
-
-            db.session.commit()
-
-    app.run(debug=True)
-    
