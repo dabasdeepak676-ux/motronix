@@ -9,7 +9,7 @@ from collections import defaultdict
 import re
 
 app = Flask(__name__)
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)
 app.config["SECRET_KEY"] = "motronix-super-secure-2026"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -125,28 +125,31 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-   if request.method == "POST":
-    username = request.form['username']
-    raw_password = request.form['password']
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
 
-    from werkzeug.security import generate_password_hash
-    hashed_password = generate_password_hash(raw_password)
+        # Check if username already exists
+        existing_user = User.query.filter_by(username=username).first()
+        if existing_user:
+            flash("Username already exists. Please choose another.")
+            return redirect(url_for("register"))
 
-    # 🔥 CHECK IF USER EXISTS
-    existing_user = User.query.filter_by(username=username).first()
+        hashed_password = generate_password_hash(password)
 
-    if existing_user:
-        flash("Username already exists. Please choose another.")
-        return redirect("/register")
+        new_user = User(
+            username=username,
+            password=hashed_password,
+            role="user"
+        )
 
-    new_user = User(username=username, password=hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
+        db.session.add(new_user)
+        db.session.commit()
 
-    flash("Account created successfully. Please login.")
-    return redirect("/login")
+        flash("Account created successfully. Please login.")
+        return redirect(url_for("login"))
 
-    return render_template("auth.html")
+    return render_template("register.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -374,14 +377,13 @@ Inspection karwana better hai.
     return jsonify({
         "reply": "Buying, service, engine ya EV ke baare me pooch sakte ho."
     })
+
 # ================= INIT =================
 
 if __name__ == "__main__":
     with app.app_context():
-        db.drop_all()   # TEMP reset (remove later)
         db.create_all()
 
-        # Create default categories if not exist
         if Category.query.count() == 0:
             default_categories = [
                 "Maintenance",
@@ -397,5 +399,5 @@ if __name__ == "__main__":
 
             db.session.commit()
 
-    app.run(debug=True, host="0.0.0.0", port=10000)
+    app.run(debug=True)
     
