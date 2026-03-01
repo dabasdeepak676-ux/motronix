@@ -378,8 +378,7 @@ Inspection karwana better hai.
         "reply": "Buying, service, engine ya EV ke baare me pooch sakte ho."
     })
 
-@app.before_first_request
-def initialize_database():
+with app.app_context():
     db.create_all()
 
 # ================= INIT =================
