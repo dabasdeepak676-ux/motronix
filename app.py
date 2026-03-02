@@ -7,11 +7,43 @@ from flask_wtf import CSRFProtect
 import os
 from collections import defaultdict
 import re
+from datetime import datetime, timedelta
+from authlib.integrations.flask_client import OAuth
+from dotenv import load_dotenv
+load_dotenv()
+import secrets
 
 app = Flask(__name__)
 # csrf = CSRFProtect(app)
-app.config["SECRET_KEY"] = "motronix-super-secure-2026"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app = Flask(__name__)
+# csrf = CSRFProtect(app)
+
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# 🔐 Production Security Settings
+if os.environ.get("ENV") == "production":
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["REMEMBER_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
+    app.config["REMEMBER_COOKIE_HTTPONLY"] = True
+
+oauth = OAuth(app)
+oauth = OAuth(app)
+
+google = oauth.register(
+    name='google',
+    client_id=os.environ.get("GOOGLE_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 UPLOAD_FOLDER = "static/news_images"
@@ -60,11 +92,18 @@ KNOWLEDGE_BASE = {
 # ================= MODELS =================
 
 class User(UserMixin, db.Model):
+    reset_token = db.Column(db.String(200), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="user")
+    
+    email_verified = db.Column(db.Boolean, default=False)
 
+    verification_token = db.Column(db.String(200), nullable=True)
+    verification_token_expiry = db.Column(db.DateTime, nullable=True)
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
@@ -119,9 +158,9 @@ def home():
 def register():
     if request.method == "POST":
         username = request.form.get("username")
+        email = request.form.get("email")
         password = request.form.get("password")
 
-        # Check if username already exists
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
             flash("Username already exists. Please choose another.")
@@ -129,16 +168,27 @@ def register():
 
         hashed_password = generate_password_hash(password)
 
+        token = secrets.token_urlsafe(32)
+        expiry = datetime.utcnow() + timedelta(minutes=30)
+
         new_user = User(
             username=username,
+            email=email,
             password=hashed_password,
-            role="user"
+            role="user",
+            email_verified=False,
+            verification_token=token,
+            verification_token_expiry=expiry
         )
 
         db.session.add(new_user)
         db.session.commit()
 
-        flash("Account created successfully. Please login.")
+        print("\n==== EMAIL VERIFICATION LINK ====")
+        print(f"http://127.0.0.1:5000/verify-email/{token}")
+        print("==== END LINK ====\n")
+
+        flash("Account created. Please verify your email.")
         return redirect(url_for("login"))
 
     return render_template("register.html")
@@ -150,15 +200,55 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter(
+            (User.username == username) | (User.email == username)
+        ).first()
 
         if user and check_password_hash(user.password, password):
+
+            if not user.email_verified:
+                flash("Please verify your email before logging in.")
+                return redirect(url_for("login"))
+
             login_user(user)
             return redirect("/community")
+
         else:
             flash("Invalid credentials")
 
     return render_template("auth.html")
+@app.route("/login/google")
+def google_login():
+    redirect_uri = url_for("google_callback", _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+
+@app.route("/google/callback")
+def google_callback():
+    token = google.authorize_access_token()
+    user_info = token.get("userinfo")
+
+    if not user_info:
+        user_info = google.get("userinfo").json()
+
+    email = user_info["email"]
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        user = User(
+            username=email.split("@")[0],
+            email=email,
+            password=generate_password_hash(secrets.token_urlsafe(16)),
+            email_verified=True
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    login_user(user)
+    return redirect("/community")
+    redirect_uri = url_for("google_callback", _external=True)
+    return google.authorize_redirect(redirect_uri)
 @app.route("/make-admin")
 def make_admin():
     user = User.query.first()
@@ -311,6 +401,33 @@ def create_news():
 
 from flask import jsonify
 import requests
+# ================= FORGOT PASSWORD =================
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email")
+
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            token = secrets.token_urlsafe(32)
+            expiry = datetime.utcnow() + timedelta(minutes=15)
+
+            user.reset_token = token
+            user.reset_token_expiry = expiry
+            db.session.commit()
+
+            print("\n==== PASSWORD RESET LINK ====")
+            print(f"http://127.0.0.1:5000/reset-password/{token}")
+            print("==== END LINK ====\n")
+
+            flash("Reset link generated. Check server console.")
+        else:
+            flash("Email not found.")
+
+    return render_template("forgot_password.html")
+
 # ================= CLEAN FOLLOW-UP AI =================
 
 followup_state = {}
@@ -400,6 +517,52 @@ def delete_comment(comment_id):
 
     return redirect(url_for("post_detail", post_id=post_id))
 
+# ================= EMAIL VERIFICATION =================
+
+@app.route("/verify-email/<token>")
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+
+    if not user:
+        return "Invalid or expired verification link."
+
+    if user.verification_token_expiry < datetime.utcnow():
+        return "Verification link expired."
+
+    user.email_verified = True
+    user.verification_token = None
+    user.verification_token_expiry = None
+
+    db.session.commit()
+
+    flash("Email verified successfully. You can now login.")
+    return redirect(url_for("login"))
+
+# ================= RESET PASSWORD =================
+
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    user = User.query.filter_by(reset_token=token).first()
+
+    if not user:
+        return "Invalid or expired token."
+
+    if user.reset_token_expiry < datetime.utcnow():
+        return "Token expired."
+
+    if request.method == "POST":
+        new_password = request.form.get("password")
+
+        user.password = generate_password_hash(new_password)
+        user.reset_token = None
+        user.reset_token_expiry = None
+
+        db.session.commit()
+
+        flash("Password reset successful. Please login.")
+        return redirect(url_for("login"))
+
+    return render_template("reset_password.html")
 
 # ================= DB INIT =================
 
