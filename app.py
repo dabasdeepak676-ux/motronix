@@ -81,14 +81,19 @@ from email.header import Header
 
 def send_email(to, subject, body):
     try:
+        print("SENDING EMAIL TO:", to)
+
         msg = Message(
             subject=subject,
             recipients=[to],
             body=body,
             sender="noreply@motronix.co.in"
         )
+
         mail.send(msg)
+
         print("EMAIL SENT SUCCESSFULLY")
+
     except Exception as e:
         print("EMAIL ERROR:", e)
 
@@ -185,11 +190,6 @@ def load_user(user_id):
 
 # ================= ROUTES =================
 
-@app.route("/")
-def home():
-    return render_template("home.html")
-
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -212,7 +212,9 @@ def register():
 
         token = secrets.token_urlsafe(32)
         expiry = datetime.utcnow() + timedelta(minutes=30)
+
         print("SENDING EMAIL TO:", email)
+
         new_user = User(
             username=username,
             email=email,
@@ -226,119 +228,21 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        # 👇 IMPORTANT – ADD THIS BACK
         verification_link = url_for("verify_email", token=token, _external=True)
-        send_email(
-    to=email,
-    subject="Verify your Motronix account",
-    body=f"Click this link to verify your account:\n\n{verification_link}"
-)
+
+        try:
+            send_email(
+                to=email,
+                subject="Verify your Motronix account",
+                body=f"Click this link to verify your account:\n\n{verification_link}"
+            )
+        except Exception as e:
+            print("EMAIL FAILED:", e)
 
         flash("Account created. Please verify your email.")
         return redirect(url_for("login"))
 
     return render_template("register.html")
-
-
-
-    hashed_password = generate_password_hash(password)
-
-    token = secrets.token_urlsafe(32)
-    expiry = datetime.utcnow() + timedelta(minutes=30)
-
-    new_user = User(
-            username=username,
-            email=email,
-            password=hashed_password,
-            email_verified=False,
-            verification_token=token,
-            verification_token_expiry=expiry
-        )
-
-    db.session.add(new_user)
-    db.session.commit()
-
-    verification_link = url_for("verify_email", token=token, _external=True)
-
-    send_email(
-            to=email,
-            subject="Verify your Motronix account",
-            body=f"Click this link to verify your account:\n\n{verification_link}"
-        )
-
-    flash("Account created. Please check your email.")
-    return redirect(url_for("login"))
-
-    return render_template("register.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        user = User.query.filter(
-            (User.username == username) | (User.email == username)
-        ).first()
-
-        if user and check_password_hash(user.password, password):
-
-            if not user.email_verified:
-                flash("Please verify your email before logging in.")
-                return redirect(url_for("login"))
-
-            login_user(user)
-            return redirect("/community")
-
-        else:
-            flash("Invalid credentials")
-
-    return render_template("auth.html")
-@app.route("/login/google")
-def google_login():
-    redirect_uri = url_for("google_callback", _external=True)
-    return google.authorize_redirect(redirect_uri)
-
-
-@app.route("/google/callback")
-def google_callback():
-    token = google.authorize_access_token()
-    user_info = token.get("userinfo")
-
-    if not user_info:
-        user_info = google.get("userinfo").json()
-
-    email = user_info["email"]
-
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        user = User(
-            username=email.split("@")[0],
-            email=email,
-            password=generate_password_hash(secrets.token_urlsafe(16)),
-            email_verified=True
-        )
-        db.session.add(user)
-        db.session.commit()
-
-    login_user(user)
-    return redirect("/community")
-@app.route("/make-admin")
-def make_admin():
-    user = User.query.first()
-    user.role = "admin"
-    db.session.commit()
-    return "Admin assigned"
-
-
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    return redirect("/")
-
 
 # ================= COMMUNITY =================
 
