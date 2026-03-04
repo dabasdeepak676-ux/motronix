@@ -682,6 +682,27 @@ def list_models():
 with app.app_context():
     db.create_all()
 
+# ==============================
+# ADMIN DASHBOARD
+# ==============================
+
+@app.route("/admin")
+@login_required
+def admin_dashboard():
+
+    if current_user.role != "admin":
+        return "Access Denied", 403
+
+    users = User.query.all()
+    posts = Post.query.all()
+    news = News.query.all()
+
+    return render_template(
+        "admin.html",
+        users=users,
+        posts=posts,
+        news=news
+    )
 # ================= START SERVER =================
 
 if __name__ == "__main__":
