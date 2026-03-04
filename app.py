@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -6,21 +9,38 @@ from werkzeug.utils import secure_filename
 from flask_wtf import CSRFProtect
 import os
 from collections import defaultdict
+from google import genai
 import re
 from datetime import datetime, timedelta
 from authlib.integrations.flask_client import OAuth
-from dotenv import load_dotenv
-load_dotenv()
+
 import secrets
 
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in environment variables")
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
 app = Flask(__name__)
-# csrf = CSRFProtect(app)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "fallback-super-secret"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
-app = Flask(__name__)
+from flask_mail import Mail, Message
+
+app.config['MAIL_SERVER'] = 'smtp-relay.brevo.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = os.environ.get("MAIL_USERNAME")
+app.config['MAIL_PASSWORD'] = os.environ.get("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = ("Motronix", os.environ.get("MAIL_FROM"))
+
+mail = Mail(app)
+
+print("MAIL USER:", app.config['MAIL_USERNAME'])
+print("MAIL PASS:", app.config['MAIL_PASSWORD'])
 # csrf = CSRFProtect(app)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "super-secret-dev-key-123"
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -32,8 +52,6 @@ if os.environ.get("ENV") == "production":
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
 
 oauth = OAuth(app)
-oauth = OAuth(app)
-
 google = oauth.register(
     name='google',
     client_id=os.environ.get("GOOGLE_CLIENT_ID"),
@@ -44,7 +62,6 @@ google = oauth.register(
     }
 )
 
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 UPLOAD_FOLDER = "static/news_images"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -59,6 +76,22 @@ conversation_memory = defaultdict(list)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+from email.header import Header
+
+def send_email(to, subject, body):
+    try:
+        msg = Message(
+            subject=subject,
+            recipients=[to],
+            body=body,
+            sender="noreply@motronix.co.in"
+        )
+        mail.send(msg)
+        print("EMAIL SENT SUCCESSFULLY")
+    except Exception as e:
+        print("EMAIL ERROR:", e)
+
 # ================= AUTOHIVE KNOWLEDGE BASE =================
 
 KNOWLEDGE_BASE = {
@@ -99,7 +132,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="user")
-    
+    ai_uses_today = db.Column(db.Integer, default=0)
+    ai_last_reset = db.Column(db.DateTime)
     email_verified = db.Column(db.Boolean, default=False)
 
     verification_token = db.Column(db.String(200), nullable=True)
@@ -144,8 +178,10 @@ class News(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
-
+    user = db.session.get(User, int(user_id))
+    if user:
+        return user
+    return None
 
 # ================= ROUTES =================
 
@@ -157,20 +193,26 @@ def home():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
+
         username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
 
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            flash("Username already exists. Please choose another.")
+        existing_username = User.query.filter_by(username=username).first()
+        if existing_username:
+            flash("Username already exists.")
+            return redirect(url_for("register"))
+
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email:
+            flash("Email already registered. Please login.")
             return redirect(url_for("register"))
 
         hashed_password = generate_password_hash(password)
 
         token = secrets.token_urlsafe(32)
         expiry = datetime.utcnow() + timedelta(minutes=30)
-
+        print("SENDING EMAIL TO:", email)
         new_user = User(
             username=username,
             email=email,
@@ -184,12 +226,48 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        print("\n==== EMAIL VERIFICATION LINK ====")
-        print(f"http://127.0.0.1:5000/verify-email/{token}")
-        print("==== END LINK ====\n")
+        # 👇 IMPORTANT – ADD THIS BACK
+        verification_link = url_for("verify_email", token=token, _external=True)
+        send_email(
+    to=email,
+    subject="Verify your Motronix account",
+    body=f"Click this link to verify your account:\n\n{verification_link}"
+)
 
         flash("Account created. Please verify your email.")
         return redirect(url_for("login"))
+
+    return render_template("register.html")
+
+
+
+    hashed_password = generate_password_hash(password)
+
+    token = secrets.token_urlsafe(32)
+    expiry = datetime.utcnow() + timedelta(minutes=30)
+
+    new_user = User(
+            username=username,
+            email=email,
+            password=hashed_password,
+            email_verified=False,
+            verification_token=token,
+            verification_token_expiry=expiry
+        )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    verification_link = url_for("verify_email", token=token, _external=True)
+
+    send_email(
+            to=email,
+            subject="Verify your Motronix account",
+            body=f"Click this link to verify your account:\n\n{verification_link}"
+        )
+
+    flash("Account created. Please check your email.")
+    return redirect(url_for("login"))
 
     return render_template("register.html")
 
@@ -247,8 +325,6 @@ def google_callback():
 
     login_user(user)
     return redirect("/community")
-    redirect_uri = url_for("google_callback", _external=True)
-    return google.authorize_redirect(redirect_uri)
 @app.route("/make-admin")
 def make_admin():
     user = User.query.first()
@@ -418,71 +494,127 @@ def forgot_password():
             user.reset_token_expiry = expiry
             db.session.commit()
 
-            print("\n==== PASSWORD RESET LINK ====")
-            print(f"http://127.0.0.1:5000/reset-password/{token}")
-            print("==== END LINK ====\n")
+            reset_link = url_for("reset_password", token=token, _external=True)
 
-            flash("Reset link generated. Check server console.")
+            send_email(
+                to=email,
+                subject="Reset your Motronix password",
+                body=f"Click this link to reset your password:\n\n{reset_link}"
+            )
+
+            flash("Reset link sent to your email.")
         else:
             flash("Email not found.")
 
     return render_template("forgot_password.html")
 
-# ================= CLEAN FOLLOW-UP AI =================
-
-followup_state = {}
+# ================= GEMINI DIAGNOSTIC AI =================
 
 @app.route("/ask-ai", methods=["POST"])
 @login_required
 def ask_ai():
 
+    print("ask_ai route hit")
+
     data = request.get_json()
-    user_message = data.get("message", "").lower()
-    user_id = current_user.id
-
-    # ===== Follow-up Answer =====
-    if user_id in followup_state:
-
-        topic = followup_state[user_id]
-        del followup_state[user_id]
-
-        if topic == "gear":
-
-            if "morning" in user_message:
-                return jsonify({
-                    "reply": """🔍 Gear Issue:
-Morning me hard gear cold transmission oil ki wajah se hota hai.
-
-🛠 Advice:
-5–10 min smooth drive karo.
-Warm hone ke baad smooth ho jaye to normal hai.
-
-⚠ Warning:
-Grinding sound aaye to mechanic dikhao.
-"""
-                })
-            else:
-                return jsonify({
-                    "reply": """⚠ Gear Problem Serious Ho Sakta Hai:
-Agar har time hard hai to clutch ya gearbox issue ho sakta hai.
-
-Inspection karwana better hai.
-"""
-                })
-
-    # ===== First Question Detection =====
-    if "gear" in user_message or "clutch" in user_message:
-
-        followup_state[user_id] = "gear"
-
+    if not data:
         return jsonify({
-            "reply": "Ye problem morning me hoti hai ya har time? 🤔"
+            "reply": "Invalid request."
         })
 
-    return jsonify({
-        "reply": "Buying, service, engine ya EV ke baare me pooch sakte ho."
-    })
+    user_message = data.get("message")
 
+    if not user_message or not user_message.strip():
+        return jsonify({
+            "reply": "Tell me clearly what you’re experiencing — noise, vibration, warning light, mileage drop, startup issue, etc."
+        })
+
+    # ================= DAILY RESET LOGIC =================
+
+    today = datetime.utcnow().date()
+
+    if not current_user.ai_last_reset or current_user.ai_last_reset.date() != today:
+        current_user.ai_uses_today = 0
+        current_user.ai_last_reset = datetime.utcnow()
+        db.session.commit()
+
+    # ================= FREE LIMIT CHECK =================
+
+    if current_user.role != "premium" and current_user.ai_uses_today >= 5:
+        return jsonify({
+            "reply": "Free AI limit reached (5 per day). Upgrade to Premium for unlimited deep diagnostics."
+        })
+
+    # ================= PROMPT =================
+
+    prompt = f"""
+You are Motronix AI, a highly experienced Indian automotive diagnostic expert.
+
+Think like a real senior mechanic.
+Explain clearly but naturally.
+Be practical and solution-focused.
+
+Cover:
+- What might be happening
+- Most likely causes (ranked logically)
+- What the user should check immediately
+- Whether it is safe to drive
+- Estimated repair cost in India
+- When to visit mechanic urgently
+
+User issue:
+{user_message}
+"""
+
+    try:
+        print("Gemini request started")
+
+        # ================= MODEL SWITCHING =================
+
+        if current_user.role == "premium":
+            model_name = "gemini-2.5-pro"
+            max_tokens = 1200
+            temperature = 0.7
+        else:
+            model_name = "gemini-2.5-flash"
+            max_tokens = 600
+            temperature = 0.6
+
+        # ================= GEMINI CALL =================
+
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config={
+                "temperature": temperature,
+                "max_output_tokens": max_tokens,
+                "top_p": 0.9
+            }
+        )
+
+        # ================= SAFE RESPONSE CHECK =================
+
+        if not response or not hasattr(response, "text") or not response.text:
+            return jsonify({
+                "reply": "AI could not generate a response. Please try again."
+            })
+
+        reply = response.text.strip()
+
+        # ================= INCREMENT USAGE =================
+
+        current_user.ai_uses_today += 1
+        db.session.commit()
+
+        return jsonify({
+            "reply": reply
+        })
+
+    except Exception as e:
+        print("Gemini ERROR:", e)
+        return jsonify({
+            "reply": "AI temporarily unavailable. Please try again."
+        })
 # ================= EDIT COMMENT =================
 
 @app.route("/comment/<int:comment_id>/edit", methods=["GET", "POST"])
@@ -564,13 +696,22 @@ def reset_password(token):
 
     return render_template("reset_password.html")
 
+# ================= LIST AVAILABLE MODELS =================
+
+@app.route("/list-models")
+def list_models():
+    models = client.models.list()
+    output = []
+    for m in models:
+        output.append(m.name)
+    return {"models": output}
+
 # ================= DB INIT =================
 
 with app.app_context():
     db.create_all()
 
-
 # ================= START SERVER =================
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
