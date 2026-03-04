@@ -87,7 +87,7 @@ def send_email(to, subject, body):
             subject=subject,
             recipients=[to],
             body=body,
-            sender="noreply@motronix.co.in"
+            sender=("Motronix", os.environ.get("MAIL_FROM"))
         )
 
         mail.send(msg)
