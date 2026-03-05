@@ -831,11 +831,11 @@ User issue:
 
         if current_user.role == "premium":
             model_name = "gemini-2.5-pro"
-            max_tokens = 1200
+            max_tokens = 3000
             temperature = 0.7
         else:
             model_name = "gemini-2.5-flash"
-            max_tokens = 600
+            max_tokens = 1500
             temperature = 0.6
 
         # ================= GEMINI CALL =================
@@ -857,7 +857,7 @@ User issue:
                 "reply": "AI could not generate a response. Please try again."
             })
 
-        reply = response.text.strip()
+        reply = str(response.text).strip()
 
         # ================= INCREMENT USAGE =================
 
