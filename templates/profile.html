@@ -2,19 +2,79 @@
 
 {% block content %}
 
-<h2>{{ user.username }}'s Profile</h2>
-<hr>
+<div class="auth-wrapper">
 
-<h3>Posts:</h3>
+<div class="auth-container">
 
-{% for post in user.posts %}
-    <div class="card">
-        <h4>{{ post.title }}</h4>
-        <p>{{ post.content }}</p>
-    </div>
-    <br>
-{% else %}
-    <p>No posts yet.</p>
-{% endfor %}
+<h2 class="auth-title">My Profile</h2>
+
+<div class="profile-stats">
+
+<div class="stat-box">
+<span>Cars</span>
+<strong>{{ cars_count }}</strong>
+</div>
+
+<div class="stat-box">
+<span>Posts</span>
+<strong>{{ posts_count }}</strong>
+</div>
+
+<div class="stat-box">
+<span>AI Used Today</span>
+<strong>{{ ai_used }}</strong>
+</div>
+
+</div>
+
+<div class="profile-info">
+
+<div class="profile-row">
+<span>Username</span>
+<strong>{{ current_user.username }}</strong>
+</div>
+
+<div class="profile-row">
+<span>Email</span>
+<strong>{{ current_user.email }}</strong>
+</div>
+
+<div class="profile-row">
+<span>Mobile</span>
+<strong>{{ current_user.mobile or "Not added" }}</strong>
+</div>
+
+</div>
+
+<div class="profile-actions">
+
+<a href="/garage" class="auth-button">
+My Cars
+</a>
+
+<a href="/add-car" class="auth-button">
+Add Car
+</a>
+
+</div>
+
+<form method="POST" class="profile-form">
+
+<input
+type="text"
+name="mobile"
+placeholder="Enter mobile number"
+class="auth-input"
+/>
+
+<button type="submit" class="auth-button">
+Save Mobile
+</button>
+
+</form>
+
+</div>
+
+</div>
 
 {% endblock %}

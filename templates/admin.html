@@ -2,35 +2,182 @@
 
 {% block content %}
 
-<h1>Admin Dashboard</h1>
+<div class="admin-container">
 
-<h2>Users</h2>
+<h1 class="admin-title">Admin Dashboard</h1>
 
-<table border="1">
+<!-- PLATFORM STATS -->
+
+<h2 class="admin-heading">Platform Stats</h2>
+
+<div class="admin-stats">
+
+<div class="stat-card">
+<h3>Total Users</h3>
+<p>{{ total_users }}</p>
+</div>
+
+<div class="stat-card">
+<h3>Total Posts</h3>
+<p>{{ posts|length }}</p>
+</div>
+
+<div class="stat-card">
+<h3>Total Comments</h3>
+<p>{{ comments|length }}</p>
+</div>
+
+<div class="stat-card">
+<h3>Total AI Usage Today</h3>
+<p>{{ total_ai_usage }}</p>
+</div>
+
+</div>
+
+<hr class="admin-divider">
+
+<!-- USER SEARCH -->
+
+<form method="GET" action="/admin" class="admin-search">
+
+<input
+type="text"
+name="search"
+placeholder="Search user by username or email"
+class="search-input"
+/>
+
+<button type="submit" class="btn-primary">
+Search
+</button>
+
+</form>
+
+<!-- USERS -->
+
+<h2 class="admin-heading">Users</h2>
+
+<table class="admin-table">
+
 <tr>
 <th>ID</th>
 <th>Username</th>
 <th>Email</th>
 <th>Role</th>
+<th>Action</th>
 </tr>
 
 {% for user in users %}
 
 <tr>
+
 <td>{{ user.id }}</td>
 <td>{{ user.username }}</td>
 <td>{{ user.email }}</td>
 <td>{{ user.role }}</td>
+
+<td>
+
+{% if user.role == "admin" %}
+
+{% if user.id != current_user.id %} <a class="btn-danger" href="/admin/remove-admin/{{ user.id }}">Remove Admin</a>
+{% else %} <span class="badge">You</span>
+{% endif %}
+
+{% else %}
+
+{% if user.is_banned %} <a class="btn-success" href="/admin/unban-user/{{ user.id }}">Unban</a>
+{% else %} <a class="btn-danger" href="/admin/ban-user/{{ user.id }}">Ban</a>
+{% endif %}
+
+{% endif %}
+
+</td>
+
 </tr>
 
 {% endfor %}
 
 </table>
 
-<h2>Total Posts</h2>
-<p>{{ posts|length }}</p>
+<hr class="admin-divider">
 
-<h2>Total News</h2>
-<p>{{ news|length }}</p>
+<!-- POSTS -->
+
+<h2 class="admin-heading">Posts</h2>
+
+<table class="admin-table">
+
+<tr>
+<th>ID</th>
+<th>Title</th>
+<th>User</th>
+<th>Action</th>
+</tr>
+
+{% for post in posts %}
+
+<tr>
+
+<td>{{ post.id }}</td>
+<td>{{ post.title }}</td>
+<td>{{ post.author.username }}</td>
+
+<td>
+
+<form action="/post/{{ post.id }}/delete" method="POST">
+<button class="btn-danger" type="submit">
+Delete
+</button>
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+<hr class="admin-divider">
+
+<!-- COMMENTS -->
+
+<h2 class="admin-heading">Comments</h2>
+
+<table class="admin-table">
+
+<tr>
+<th>ID</th>
+<th>Comment</th>
+<th>User</th>
+<th>Action</th>
+</tr>
+
+{% for comment in comments %}
+
+<tr>
+
+<td>{{ comment.id }}</td>
+<td>{{ comment.content }}</td>
+<td>{{ comment.user.username }}</td>
+
+<td>
+
+<form action="/comment/{{ comment.id }}/delete" method="POST">
+<button class="btn-danger" type="submit">
+Delete
+</button>
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
 
 {% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+
+    <div class="auth-container">
+
+        <h2 class="auth-title">AI Car Diagnosis</h2>
+
+        <form method="POST" class="auth-form">
+
+            <!-- Select Car -->
+            <select name="car_id" class="auth-input" required>
+
+                {% for car in cars %}
+
+                    <option value="{{ car.id }}">
+                        {{ car.brand }} {{ car.model }} ({{ car.year }})
+                    </option>
+
+                {% endfor %}
+
+            </select>
+
+            <!-- Problem Description -->
+            <textarea
+                name="problem"
+                placeholder="Describe your car problem (example: vibration while braking, car not starting, engine overheating)"
+                class="auth-input"
+                style="height:120px"
+                required
+            ></textarea>
+
+            <!-- Submit Button -->
+            <button type="submit" class="auth-button">
+
+                Diagnose Problem
+
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+<div class="auth-container">
+
+<h2 class="auth-title">AI Diagnosis</h2>
+
+<p>
+<b>Car:</b> {{ car.brand }} {{ car.model }} ({{ car.year }})
+</p>
+
+<hr>
+
+{% if results %}
+
+<h3>Most Likely Issue</h3>
+
+<b>{{ results[0].issue }}</b><br>
+Confidence: {{ results[0].confidence }}%<br>
+Severity: {{ results[0].severity }}<br>
+
+{% if results[0].repair_cost %}
+Estimated Repair: ₹{{ results[0].repair_cost.min }} – ₹{{ results[0].repair_cost.max }}
+{% endif %}
+
+<hr>
+
+<h3>Possible Causes</h3>
+
+<ul style="list-style:none;padding:0">
+
+{% for r in results[1:] %}
+
+<li style="margin-bottom:10px">
+<b>{{ r.issue }}</b><br>
+Confidence: {{ r.confidence }}%
+
+{% if r.explanation %}
+
+<ul style="font-size:12px;opacity:0.8">
+
+{% for e in r.explanation %}
+<li>{{ e }}</li>
+{% endfor %}
+
+</ul>
+
+{% endif %}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+<hr>
+
+{% if results[0].user_checks %}
+
+<h3>User Check</h3>
+
+<ul>
+
+{% for check in results[0].user_checks %}
+
+<li>{{ check }}</li>
+
+{% endfor %}
+
+</ul>
+
+{% endif %}
+
+<hr>
+
+{% if questions %}
+
+<h3>Follow-up Questions</h3>
+
+<form method="POST" action="/diagnose">
+
+<!-- important: original problem pass -->
+<input type="hidden" name="problem" value="{{ problem }}">
+
+{% for q in questions %}
+
+<div style="margin-bottom:15px">
+
+<p>{{ q.question }}</p>
+
+<label>
+<input type="radio" name="{{ q.key }}" value="yes" required>
+Yes
+</label>
+
+<label style="margin-left:10px;">
+<input type="radio" name="{{ q.key }}" value="no">
+No
+</label>
+
+</div>
+
+{% endfor %}
+
+<button type="submit" class="auth-button">
+Submit Answers
+</button>
+
+</form>
+
+{% endif %}
+
+{% endif %}
+
+<br>
+
+<a href="/diagnose" class="auth-button">
+Check Another Problem
+</a>
+
+</div>
+</div>
+
+{% endblock %}

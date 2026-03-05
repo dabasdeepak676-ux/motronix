@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+
+<div class="auth-container">
+
+<h2 class="auth-title">Add Your Car</h2>
+
+<form method="POST" class="auth-form">
+
+<input
+type="text"
+name="brand"
+placeholder="Car Brand (Maruti, Hyundai)"
+required
+class="auth-input"
+/>
+
+<input
+type="text"
+name="model"
+placeholder="Car Model (Swift, Creta)"
+required
+class="auth-input"
+/>
+
+<input
+type="number"
+name="year"
+placeholder="Manufacturing Year"
+required
+class="auth-input"
+/>
+
+<select name="fuel" class="auth-input">
+
+<option value="Petrol">Petrol</option>
+<option value="Diesel">Diesel</option>
+<option value="CNG">CNG</option>
+<option value="Electric">Electric</option>
+
+</select>
+
+<input
+type="number"
+name="mileage"
+placeholder="Mileage (km)"
+class="auth-input"
+/>
+
+<button type="submit" class="auth-button">
+Add Car
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

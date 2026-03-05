@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 load_dotenv()
-
+from ai_engine.diagnostic_engine import diagnose_vehicle
 from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,9 +12,93 @@ from collections import defaultdict
 from google import genai
 import re
 from datetime import datetime, timedelta
+
+from ai_engine.diagnostic_engine import diagnose_vehicle
 from authlib.integrations.flask_client import OAuth
 
 import secrets
+
+def ai_diagnose(problem, car):
+
+    problem = problem.lower()
+
+    results = []
+
+    # Brake vibration
+    if "vibration" in problem and "brake" in problem:
+
+        results.append({
+            "issue": "Brake Disc Warp",
+            "confidence": 78,
+            "reason": "Vibration during braking often indicates warped brake discs."
+        })
+
+        results.append({
+            "issue": "Brake Pad Wear",
+            "confidence": 52,
+            "reason": "Uneven brake pad wear can cause vibration."
+        })
+
+        results.append({
+            "issue": "Wheel Balancing",
+            "confidence": 31,
+            "reason": "Improper wheel balance may create vibration."
+        })
+
+    # Engine vibration
+    elif "vibration" in problem:
+
+        results.append({
+            "issue": "Engine Mount Damage",
+            "confidence": 70,
+            "reason": "Engine mounts absorb vibration."
+        })
+
+        results.append({
+            "issue": "Wheel Balancing",
+            "confidence": 45,
+            "reason": "Wheel imbalance can cause vibration."
+        })
+
+    # Noise issues
+    elif "noise" in problem or "sound" in problem:
+
+        results.append({
+            "issue": "Suspension Wear",
+            "confidence": 65,
+            "reason": "Suspension components often produce noise."
+        })
+
+        results.append({
+            "issue": "Bearing Damage",
+            "confidence": 50,
+            "reason": "Wheel bearings may create humming noise."
+        })
+
+    # Overheating
+    elif "overheat" in problem or "temperature" in problem:
+
+        results.append({
+            "issue": "Low Coolant",
+            "confidence": 75,
+            "reason": "Low coolant commonly causes overheating."
+        })
+
+        results.append({
+            "issue": "Radiator Blockage",
+            "confidence": 40,
+            "reason": "Blocked radiator reduces cooling."
+        })
+
+    else:
+
+        results.append({
+            "issue": "Unknown Issue",
+            "confidence": 20,
+            "reason": "Problem needs manual inspection."
+        })
+
+    return results
 
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
@@ -24,6 +108,14 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 app = Flask(__name__)
+ADMIN_EMAILS = [
+    "dabasdeepak676@gmail.com",
+    "riteshsingh1609@gmail.com"
+]
+@app.context_processor
+def inject_admin_emails():
+    return dict(ADMIN_EMAILS=ADMIN_EMAILS)
+    
 from flask_mail import Mail, Message
 
 app.config['MAIL_SERVER'] = 'smtp-relay.brevo.com'
@@ -40,9 +132,19 @@ print("MAIL USER:", app.config['MAIL_USERNAME'])
 print("MAIL PASS:", app.config['MAIL_PASSWORD'])
 # csrf = CSRFProtect(app)
 
+# ===============================
+# DATABASE CONFIG (LOCAL + PROD)
+# ===============================
+
+database_url = os.environ.get("DATABASE_URL")
+
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "super-secret-dev-key-123"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL") or "sqlite:///database.db"
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+db = SQLAlchemy(app)
 
 # 🔐 Production Security Settings
 if os.environ.get("ENV") == "production":
@@ -68,8 +170,6 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
-db = SQLAlchemy(app)
 
 conversation_memory = defaultdict(list)
 
@@ -130,10 +230,12 @@ KNOWLEDGE_BASE = {
 # ================= MODELS =================
 
 class User(UserMixin, db.Model):
+    is_banned = db.Column(db.Boolean, default=False)
     reset_token = db.Column(db.String(200), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
+    mobile = db.Column(db.String(20))
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     role = db.Column(db.String(20), default="user")
@@ -178,7 +280,37 @@ class News(db.Model):
     image = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
+class Car(db.Model):
+     
+    id = db.Column(db.Integer, primary_key=True)
 
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    brand = db.Column(db.String(100))
+
+    model = db.Column(db.String(100))
+
+    year = db.Column(db.Integer)
+
+    fuel_type = db.Column(db.String(50))
+
+    mileage = db.Column(db.Integer)
+
+    is_default = db.Column(db.Boolean, default=False)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    owner = db.relationship(
+        "User",
+        backref="cars"
+    )
 # ================= LOGIN =================
 
 @login_manager.user_loader
@@ -191,8 +323,21 @@ def load_user(user_id):
 # ================= ROUTES =================
 
 @app.route("/")
+@login_required
 def home():
-    return render_template("home.html")
+
+    cars = Car.query.filter_by(owner_id=current_user.id).all()
+
+    default_car = Car.query.filter_by(
+        owner_id=current_user.id,
+        is_default=True
+    ).first()
+
+    return render_template(
+        "home.html",
+        default_car=default_car,
+        cars=cars
+    )
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -255,6 +400,13 @@ def login():
         ).first()
 
         if user and check_password_hash(user.password, password):
+            # Auto admin assign
+            if user.email in ADMIN_EMAILS:
+             user.role = "admin"
+             db.session.commit()
+            if user.is_banned:
+              flash("Your account has been banned.")
+              return redirect(url_for("login"))
 
             if not user.email_verified:
                 flash("Please verify your email before logging in.")
@@ -275,7 +427,9 @@ def google_login():
 
 @app.route("/google/callback")
 def google_callback():
+
     token = google.authorize_access_token()
+
     user_info = token.get("userinfo")
 
     if not user_info:
@@ -295,14 +449,26 @@ def google_callback():
         db.session.add(user)
         db.session.commit()
 
+    # ✅ Admin assignment after user exists
+    if user.email in ADMIN_EMAILS:
+        user.role = "admin"
+        db.session.commit()
+
     login_user(user)
+
     return redirect("/community")
+
 @app.route("/make-admin")
 def make_admin():
-    user = User.query.first()
-    user.role = "admin"
-    db.session.commit()
-    return "Admin assigned"
+
+    user = User.query.order_by(User.id.desc()).first()
+
+    if user:
+        user.role = "admin"
+        db.session.commit()
+        return "Admin assigned"
+
+    return "No user found"
 
 @app.route("/logout")
 @login_required
@@ -311,56 +477,171 @@ def logout():
     flash("You have been logged out.")
     return redirect("/")
 
+@app.route("/profile")
+@login_required
+def profile():
+
+    cars_count = Car.query.filter_by(owner_id=current_user.id).count()
+
+    posts_count = Post.query.filter_by(user_id=current_user.id).count()
+
+    ai_used = current_user.ai_uses_today
+
+    return render_template(
+        "profile.html",
+        cars_count=cars_count,
+        posts_count=posts_count,
+        ai_used=ai_used
+    )
+
+
 # ================= COMMUNITY =================
 
 @app.route("/community")
+@login_required
 def community():
+
     posts = Post.query.order_by(Post.id.desc()).all()
+
     return render_template("community.html", posts=posts)
 
+
+# ================= ADD CAR =================
+
+@app.route("/add-car", methods=["GET", "POST"])
+@login_required
+def add_car():
+
+    if request.method == "POST":
+
+        brand = request.form["brand"]
+        model = request.form["model"]
+        year = request.form["year"]
+        fuel = request.form["fuel"]
+        mileage = request.form["mileage"]
+
+        existing_car = Car.query.filter_by(owner_id=current_user.id).first()
+
+        car = Car(
+            owner_id=current_user.id,
+            brand=brand,
+            model=model,
+            year=year,
+            fuel_type=fuel,
+            mileage=mileage,
+            is_default=True if not existing_car else False
+        )
+
+        db.session.add(car)
+        db.session.commit()
+
+        return redirect("/garage")
+
+    return render_template("add_car.html")
+
+
+# ================= GARAGE =================
+
+@app.route("/garage")
+@login_required
+def garage():
+
+    cars = Car.query.filter_by(owner_id=current_user.id).all()
+
+    return render_template("garage.html", cars=cars)
+
+
+# ================= AI DIAGNOSE =================
+
+@app.route("/diagnose", methods=["GET", "POST"])
+@login_required
+def diagnose():
+
+    car = Car.query.first()
+
+    if request.method == "POST":
+
+        problem = request.form.get("problem")
+
+        # collect answers from follow-up questions
+        answers = {}
+
+        for key in request.form:
+            if key != "problem":
+                answers[key] = request.form.get(key)
+
+        results, questions = diagnose_vehicle(problem, answers)
+
+        return render_template(
+    "diagnosis_result.html",
+    car=car,
+    results=results,
+    questions=questions,
+    problem=problem
+)
+
+    return render_template("diagnose.html", car=car)
+# ================= CREATE POST =================
 
 @app.route("/create", methods=["GET", "POST"])
 @login_required
 def create():
 
     if request.method == "POST":
+
         post = Post(
             title=request.form["title"],
             content=request.form["content"],
             user_id=current_user.id,
         )
+
         db.session.add(post)
         db.session.commit()
+
         return redirect("/community")
 
     return render_template("create.html")
 
+
+# ================= POST DETAIL =================
+
 @app.route("/post/<int:post_id>")
 def post_detail(post_id):
+
     post = Post.query.get_or_404(post_id)
+
     return render_template("post_detail.html", post=post)
 
+
+# ================= EDIT POST =================
 
 @app.route("/post/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
+
     post = Post.query.get_or_404(post_id)
 
     if post.user_id != current_user.id and current_user.role != "admin":
         return "Unauthorized"
 
     if request.method == "POST":
+
         post.title = request.form["title"]
         post.content = request.form["content"]
+
         db.session.commit()
+
         return redirect(url_for("post_detail", post_id=post.id))
 
     return render_template("edit.html", post=post)
 
 
+# ================= DELETE POST =================
+
 @app.route("/post/<int:post_id>/delete", methods=["POST"])
 @login_required
 def delete_post(post_id):
+
     post = Post.query.get_or_404(post_id)
 
     if post.user_id != current_user.id and current_user.role != "admin":
@@ -372,26 +653,34 @@ def delete_post(post_id):
     return redirect(url_for("community"))
 
 
+# ================= ADD COMMENT =================
+
 @app.route("/add_comment/<int:post_id>", methods=["POST"])
 @login_required
 def add_comment(post_id):
+
     content = request.form.get("content")
 
     if content:
+
         new_comment = Comment(
             content=content,
             user_id=current_user.id,
             post_id=post_id
         )
+
         db.session.add(new_comment)
         db.session.commit()
 
     return redirect(url_for("post_detail", post_id=post_id))
 
 
+# ================= UPVOTE =================
+
 @app.route("/upvote/<int:post_id>")
 @login_required
 def upvote(post_id):
+
     existing_vote = Vote.query.filter_by(
         user_id=current_user.id,
         post_id=post_id
@@ -403,8 +692,8 @@ def upvote(post_id):
         db.session.add(Vote(user_id=current_user.id, post_id=post_id))
 
     db.session.commit()
-    return redirect("/community")
 
+    return redirect("/community")
 
 # ================= NEWS =================
 
@@ -423,8 +712,8 @@ def news_detail(news_id):
 @app.route("/admin/news/create", methods=["GET", "POST"])
 @login_required
 def create_news():
-    if current_user.id != 1:
-        return "Unauthorized"
+    if current_user.role != "admin":
+     return "Access Denied"
 
     if request.method == "POST":
         image_file = request.files.get("image")
@@ -696,13 +985,66 @@ def admin_dashboard():
     users = User.query.all()
     posts = Post.query.all()
     news = News.query.all()
+    comments = Comment.query.all()
+
+    total_ai_usage = db.session.query(db.func.sum(User.ai_uses_today)).scalar() or 0
 
     return render_template(
         "admin.html",
         users=users,
         posts=posts,
-        news=news
+        news=news,
+        comments=comments,
+        total_ai_usage=total_ai_usage
     )
+
+@app.route("/admin/ban-user/<int:user_id>")
+@login_required
+def ban_user(user_id):
+
+    if current_user.role != "admin":
+        return "Access Denied"
+
+    user = User.query.get_or_404(user_id)
+    user.is_banned = True
+
+    db.session.commit()
+
+    return redirect("/admin")
+
+
+# ================= UNBAN USER =================
+
+@app.route("/admin/unban-user/<int:user_id>")
+@login_required
+def unban_user(user_id):
+
+    if current_user.role != "admin":
+        return "Access Denied"
+
+    user = User.query.get_or_404(user_id)
+
+    user.is_banned = False
+    db.session.commit()
+
+    return redirect("/admin")
+
+# ================= REMOVE ADMIN =================
+
+@app.route("/admin/remove-admin/<int:user_id>")
+@login_required
+def remove_admin(user_id):
+
+    if current_user.role != "admin":
+        return "Access Denied"
+
+    user = User.query.get_or_404(user_id)
+
+    user.role = "user"
+    db.session.commit()
+
+    return redirect("/admin")
+
 # ================= START SERVER =================
 
 if __name__ == "__main__":

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="auth-wrapper">
+
+<div class="auth-container">
+
+<h2 class="auth-title">My Garage</h2>
+
+{% if cars %}
+
+<ul style="list-style:none;padding:0">
+
+{% for car in cars %}
+
+<li style="padding:12px;border-bottom:1px solid #222;margin-bottom:10px">
+
+<b>{{ car.brand }} {{ car.model }}</b>
+
+<br>
+
+Year: {{ car.year }} |
+Fuel: {{ car.fuel_type }} |
+Mileage: {{ car.mileage }} km
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+<br>
+
+<a href="/diagnose" class="auth-button">
+AI Diagnose
+</a>
+
+{% else %}
+
+<p>No cars added yet</p>
+
+<br>
+
+<a href="/add-car" class="auth-button">
+Add Your First Car
+</a>
+
+{% endif %}
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -2,48 +2,127 @@
 {% block content %}
 
 <section class="premium-hero">
-    <h1 class="glow-text">MOTRONIX
-    <p class="tagline">Automotive Intelligence Simplified
 
-    <div class="ai-promo-badge">
-        Introducing <span>Motronix AI</span> — Your Smart Car Expert  
-        <small>Login to unlock full AI assistance</small>
-    </div>
-</section>
- <div class="cta-group">
-        <a href="/community" class="premium-btn">Enter Community</a>
+<h1 class="glow-text">Motronix</h1>
+<p class="tagline">Automotive Intelligence Simplified</p>
 
-        {% if not current_user.is_authenticated %}
-        <a href="/register" class="outline-btn">Create Account</a>
-        {% endif %}
-    </div>
+
+<div class="diagnose-card">
+
+<h2>AI Car Diagnose</h2>
+
+{% if default_car %}
+
+<p class="default-car">
+Default Car:
+<strong>{{ default_car.brand }} {{ default_car.model }}</strong>
+</p>
+
+<form action="/diagnose" method="POST" class="diagnose-form">
+
+<select name="car_id" class="auth-input" required>
+
+{% for car in cars %}
+
+<option value="{{ car.id }}"
+{% if default_car and car.id == default_car.id %}selected{% endif %}>
+{{ car.brand }} {{ car.model }} ({{ car.year }})
+</option>
+
+{% endfor %}
+
+</select>
+
+<input
+type="text"
+name="problem"
+placeholder="Describe your car problem..."
+class="auth-input"
+required
+>
+
+<button type="submit" class="auth-button">
+Diagnose Now
+</button>
+
+</form>
+
+<div class="car-actions">
+<a href="/garage" class="outline-btn">
+My Cars
+</a>
+</div>
+
+
+{% else %}
+
+<p class="no-car-text">
+Add your car to start AI diagnosis
+</p>
+
+<a href="/add-car" class="auth-button">
+Add Car
+</a>
+
+{% endif %}
 
 </div>
 
-<section class="premium-section fade-section">
 
-    <div class="feature-box">
-        <h3>🔥 Real Discussions</h3>
-        <p>Ask questions. Get answers. Learn from real owners.</p>
-    </div>
-
-    <div class="feature-box">
-        <h3>📚 Structured Knowledge</h3>
-        <p>Automotive handbook built category-wise.</p>
-    </div>
-
-    <div class="feature-box">
-        <h3>📰 News & Insights</h3>
-        <p>Latest updates from the auto world.</p>
-    </div>
+<div class="ai-promo-badge">
+Introducing <span>Motronix AI</span> — Your Smart Car Expert  
+<br>
+<small>Login to unlock full AI assistance</small>
+</div>
 
 </section>
 
+
+<div class="cta-group">
+
+<a href="/community" class="premium-btn">
+Enter Community
+</a>
+
+{% if not current_user.is_authenticated %}
+
+<a href="/register" class="outline-btn">
+Create Account
+</a>
+
+{% endif %}
+
+</div>
+
+
+<section class="premium-section fade-section">
+
+<div class="feature-box">
+<h3>🔥 Real Discussions</h3>
+<p>Ask questions. Get answers. Learn from real owners.</p>
+</div>
+
+<div class="feature-box">
+<h3>📚 Structured Knowledge</h3>
+<p>Automotive handbook built category-wise.</p>
+</div>
+
+<div class="feature-box">
+<h3>📰 News & Insights</h3>
+<p>Latest updates from the auto world.</p>
+</div>
+
+</section>
+
+
 <section class="founder-highlight fade-section">
-    <h2>Built by an Automotive Engineer</h2>
-    <p>
-        Passionate about simplifying Automotive ecosystem for smart automotive decisions.
-    </p>
+
+<h2>Built by an Automotive Engineer</h2>
+
+<p>
+Passionate about simplifying the automotive ecosystem for smarter decisions.
+</p>
+
 </section>
 
 {% endblock %}
