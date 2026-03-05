@@ -1047,5 +1047,6 @@ def remove_admin(user_id):
 
 # ================= START SERVER =================
 
-if __name__ == "__main__":
-    app.run()
+with app.app_context():
+    db.drop_all()
+    db.create_all()
