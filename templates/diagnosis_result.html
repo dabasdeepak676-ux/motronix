@@ -25,9 +25,7 @@
 Confidence: {{ results[0].confidence }}%
 </p>
 
-<p>
-Severity: {{ results[0].severity }}
-</p>
+<p>Severity: {{ results[0].severity }}</p>
 
 {% if results[0].repair_cost %}
 <p>
@@ -37,6 +35,7 @@ Estimated Repair:
 {% endif %}
 
 </div>
+
 
 <!-- ================= POSSIBLE CAUSES ================= -->
 
@@ -48,7 +47,7 @@ Estimated Repair:
 
 <div class="cause-item">
 
-<strong>{{ r.issue }}</strong>
+<h4>{{ r.issue }}</h4>
 
 <p>Confidence: {{ r.confidence }}%</p>
 
@@ -70,6 +69,7 @@ Estimated Repair:
 
 </div>
 
+
 <!-- ================= USER CHECK ================= -->
 
 {% if results[0].user_checks %}
@@ -89,6 +89,7 @@ Estimated Repair:
 </div>
 
 {% endif %}
+
 
 <!-- ================= FOLLOW UP QUESTIONS ================= -->
 
@@ -133,6 +134,7 @@ Submit Answers
 {% endif %}
 
 {% endif %}
+
 
 <div class="retry-section">
 
