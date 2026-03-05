@@ -128,8 +128,6 @@ app.config['MAIL_DEFAULT_SENDER'] = ("Motronix", os.environ.get("MAIL_FROM"))
 
 mail = Mail(app)
 
-print("MAIL USER:", app.config['MAIL_USERNAME'])
-print("MAIL PASS:", app.config['MAIL_PASSWORD'])
 # csrf = CSRFProtect(app)
 
 # ===============================
