@@ -2,44 +2,59 @@
 
 {% block content %}
 
-<div class="auth-wrapper">
-<div class="auth-container">
+<div class="diagnose-wrapper">
+<div class="diagnose-container">
 
-<h2 class="auth-title">AI Diagnosis</h2>
+<h2 class="diagnose-title">AI Diagnosis</h2>
 
-<p>
+<p class="car-info">
 <b>Car:</b> {{ car.brand }} {{ car.model }} ({{ car.year }})
 </p>
 
-<hr>
-
 {% if results %}
+
+<!-- ================= MOST LIKELY ISSUE ================= -->
+
+<div class="result-card main-result">
 
 <h3>Most Likely Issue</h3>
 
-<b>{{ results[0].issue }}</b><br>
-Confidence: {{ results[0].confidence }}%<br>
-Severity: {{ results[0].severity }}<br>
+<h2 class="issue-name">{{ results[0].issue }}</h2>
+
+<p class="confidence">
+Confidence: {{ results[0].confidence }}%
+</p>
+
+<p>
+Severity: {{ results[0].severity }}
+</p>
 
 {% if results[0].repair_cost %}
-Estimated Repair: ₹{{ results[0].repair_cost.min }} – ₹{{ results[0].repair_cost.max }}
+<p>
+Estimated Repair:
+₹{{ results[0].repair_cost.min }} – ₹{{ results[0].repair_cost.max }}
+</p>
 {% endif %}
 
-<hr>
+</div>
+
+<!-- ================= POSSIBLE CAUSES ================= -->
+
+<div class="result-card">
 
 <h3>Possible Causes</h3>
 
-<ul style="list-style:none;padding:0">
-
 {% for r in results[1:] %}
 
-<li style="margin-bottom:10px">
-<b>{{ r.issue }}</b><br>
-Confidence: {{ r.confidence }}%
+<div class="cause-item">
+
+<strong>{{ r.issue }}</strong>
+
+<p>Confidence: {{ r.confidence }}%</p>
 
 {% if r.explanation %}
 
-<ul style="font-size:12px;opacity:0.8">
+<ul class="explanation">
 
 {% for e in r.explanation %}
 <li>{{ e }}</li>
@@ -49,44 +64,47 @@ Confidence: {{ r.confidence }}%
 
 {% endif %}
 
-</li>
+</div>
 
 {% endfor %}
 
-</ul>
+</div>
 
-<hr>
+<!-- ================= USER CHECK ================= -->
 
 {% if results[0].user_checks %}
+
+<div class="result-card">
 
 <h3>User Check</h3>
 
 <ul>
 
 {% for check in results[0].user_checks %}
-
 <li>{{ check }}</li>
-
 {% endfor %}
 
 </ul>
 
+</div>
+
 {% endif %}
 
-<hr>
+<!-- ================= FOLLOW UP QUESTIONS ================= -->
 
 {% if questions %}
+
+<div class="result-card">
 
 <h3>Follow-up Questions</h3>
 
 <form method="POST" action="/diagnose">
 
-<!-- important: original problem pass -->
 <input type="hidden" name="problem" value="{{ problem }}">
 
 {% for q in questions %}
 
-<div style="margin-bottom:15px">
+<div class="question-block">
 
 <p>{{ q.question }}</p>
 
@@ -95,7 +113,7 @@ Confidence: {{ r.confidence }}%
 Yes
 </label>
 
-<label style="margin-left:10px;">
+<label class="radio-gap">
 <input type="radio" name="{{ q.key }}" value="no">
 No
 </label>
@@ -104,21 +122,25 @@ No
 
 {% endfor %}
 
-<button type="submit" class="auth-button">
+<button type="submit" class="diagnose-button">
 Submit Answers
 </button>
 
 </form>
 
-{% endif %}
+</div>
 
 {% endif %}
 
-<br>
+{% endif %}
 
-<a href="/diagnose" class="auth-button">
+<div class="retry-section">
+
+<a href="/diagnose" class="diagnose-button">
 Check Another Problem
 </a>
+
+</div>
 
 </div>
 </div>
