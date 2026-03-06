@@ -292,8 +292,12 @@ class User(UserMixin, db.Model):
     country = db.Column(db.String(100))
     pincode = db.Column(db.String(20))
 
-    badge = db.Column(db.String(50), default="Member")
     
+    reputation = db.Column(db.Integer, default=0)
+    posts_count = db.Column(db.Integer, default=0)
+    helpful_answers = db.Column(db.Integer, default=0)
+    badge = db.Column(db.String(50), default="Member")
+
 class Post(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
@@ -331,7 +335,24 @@ class News(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 class Car(db.Model):
-     
+ def update_user_reputation(user):
+
+    user.reputation = user.posts_count * 5 + user.helpful_answers * 10
+
+    if user.reputation >= 500:
+        user.badge = "Master"
+
+    elif user.reputation >= 200:
+        user.badge = "Expert"
+
+    elif user.reputation >= 50:
+        user.badge = "Contributor"
+
+    else:
+        user.badge = "Member"
+
+    db.session.commit()
+
     id = db.Column(db.Integer, primary_key=True)
 
     owner_id = db.Column(
@@ -646,9 +667,35 @@ def create():
         )
 
         db.session.add(post)
-        db.session.commit()
 
-        return redirect("/community")
+        # update reputation system
+        current_user.posts_count += 1
+        update_user_reputation(current_user)
+
+def update_user_reputation(user):
+
+    reputation = 0
+    badge = "Member"
+
+    # posts contribution
+    reputation += user.posts_count * 5
+
+    # helpful answers
+    reputation += user.helpful_answers * 10
+
+    # badge logic
+    if reputation >= 500:
+        badge = "Master"
+    elif reputation >= 200:
+        badge = "Expert"
+    elif reputation >= 50:
+        badge = "Contributor"
+
+    user.reputation = reputation
+    user.badge = badge
+    db.session.commit()
+
+    return redirect("/community")
 
     return render_template("create.html")
 
