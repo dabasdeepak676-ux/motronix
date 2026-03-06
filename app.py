@@ -382,6 +382,26 @@ class Car(db.Model):
         "User",
         backref="cars"
     )
+    # ================= REPUTATION SYSTEM =================
+
+def update_user_reputation(user):
+
+    rep = user.reputation
+
+    if rep >= 1000:
+        user.badge = "Master Technician"
+
+    elif rep >= 500:
+        user.badge = "Pro Mechanic"
+
+    elif rep >= 200:
+        user.badge = "Expert"
+
+    elif rep >= 50:
+        user.badge = "Contributor"
+
+    else:
+        user.badge = "Member"
 # ================= LOGIN =================
 
 @login_manager.user_loader
@@ -663,42 +683,22 @@ def create():
         post = Post(
             title=request.form["title"],
             content=request.form["content"],
-            user_id=current_user.id,
+            user_id=current_user.id
         )
 
         db.session.add(post)
 
-        # update reputation system
+        # reputation update
         current_user.posts_count += 1
+        current_user.reputation += 10
+
         update_user_reputation(current_user)
 
-def update_user_reputation(user):
+        db.session.commit()
 
-    reputation = 0
-    badge = "Member"
-
-    # posts contribution
-    reputation += user.posts_count * 5
-
-    # helpful answers
-    reputation += user.helpful_answers * 10
-
-    # badge logic
-    if reputation >= 500:
-        badge = "Master"
-    elif reputation >= 200:
-        badge = "Expert"
-    elif reputation >= 50:
-        badge = "Contributor"
-
-    user.reputation = reputation
-    user.badge = badge
-    db.session.commit()
-
-    return redirect("/community")
+        return redirect("/community")
 
     return render_template("create.html")
-
 
 # ================= POST DETAIL =================
 
@@ -1081,12 +1081,6 @@ def list_models():
         output.append(m.name)
     return {"models": output}
 
-# ================= DB INIT =================
-
-with app.app_context():
-    db.drop_all()
-    db.create_all()
-
 # ==============================
 # ADMIN DASHBOARD
 # ==============================
@@ -1160,6 +1154,11 @@ def remove_admin(user_id):
     db.session.commit()
 
     return redirect("/admin")
+
+# ================= DB INIT =================
+with app.app_context():
+    db.drop_all()
+    db.create_all()
 
 # ================= START SERVER =================
 
