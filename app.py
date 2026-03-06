@@ -262,14 +262,6 @@ KNOWLEDGE_BASE = {
 
 class User(UserMixin, db.Model):
 
-    is_banned = db.Column(db.Boolean, default=False)
-
-    reset_token = db.Column(db.String(200), nullable=True)
-    reset_token_expiry = db.Column(db.DateTime, nullable=True)
-
-    verification_token = db.Column(db.String(200), nullable=True)
-    verification_token_expiry = db.Column(db.DateTime, nullable=True)
-
     id = db.Column(db.Integer, primary_key=True)
 
     username = db.Column(db.String(100), unique=True, nullable=False)
@@ -284,6 +276,13 @@ class User(UserMixin, db.Model):
     ai_last_reset = db.Column(db.DateTime)
 
     email_verified = db.Column(db.Boolean, default=False)
+    is_banned = db.Column(db.Boolean, default=False)
+
+    reset_token = db.Column(db.String(200), nullable=True)
+    reset_token_expiry = db.Column(db.DateTime, nullable=True)
+
+    verification_token = db.Column(db.String(200), nullable=True)
+    verification_token_expiry = db.Column(db.DateTime, nullable=True)
 
     profile_photo = db.Column(db.String(200))
 
@@ -335,6 +334,7 @@ class News(db.Model):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 class Car(db.Model):
+ 
  def update_user_reputation(user):
 
     user.reputation = user.posts_count * 5 + user.helpful_answers * 10
