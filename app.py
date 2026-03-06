@@ -1025,6 +1025,7 @@ def list_models():
 # ================= DB INIT =================
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
 
 # ==============================
