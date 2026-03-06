@@ -333,9 +333,9 @@ class News(db.Model):
     image = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
-class Car(db.Model):
- 
- def update_user_reputation(user):
+# ================= REPUTATION SYSTEM =================
+
+def update_user_reputation(user):
 
     user.reputation = user.posts_count * 5 + user.helpful_answers * 10
 
@@ -353,6 +353,11 @@ class Car(db.Model):
 
     db.session.commit()
 
+
+# ================= CAR MODEL =================
+
+class Car(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
 
     owner_id = db.Column(
@@ -362,13 +367,10 @@ class Car(db.Model):
     )
 
     brand = db.Column(db.String(100))
-
     model = db.Column(db.String(100))
-
     year = db.Column(db.Integer)
 
     fuel_type = db.Column(db.String(50))
-
     mileage = db.Column(db.Integer)
 
     is_default = db.Column(db.Boolean, default=False)
@@ -382,26 +384,7 @@ class Car(db.Model):
         "User",
         backref="cars"
     )
-    # ================= REPUTATION SYSTEM =================
 
-def update_user_reputation(user):
-
-    rep = user.reputation
-
-    if rep >= 1000:
-        user.badge = "Master Technician"
-
-    elif rep >= 500:
-        user.badge = "Pro Mechanic"
-
-    elif rep >= 200:
-        user.badge = "Expert"
-
-    elif rep >= 50:
-        user.badge = "Contributor"
-
-    else:
-        user.badge = "Member"
 # ================= LOGIN =================
 
 @login_manager.user_loader
