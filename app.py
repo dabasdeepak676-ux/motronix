@@ -166,6 +166,39 @@ google = oauth.register(
 UPLOAD_FOLDER = "static/news_images"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
+PROFILE_UPLOAD = "static/profile_images"
+app.config["PROFILE_UPLOAD"] = PROFILE_UPLOAD
+
+if not os.path.exists(PROFILE_UPLOAD):
+    os.makedirs(PROFILE_UPLOAD)
+
+@app.route("/update-profile", methods=["POST"])
+@login_required
+def update_profile():
+
+    city = request.form.get("city")
+    state = request.form.get("state")
+    country = request.form.get("country")
+    pincode = request.form.get("pincode")
+
+    current_user.city = city
+    current_user.state = state
+    current_user.country = country
+    current_user.pincode = pincode
+
+    photo = request.files.get("photo")
+
+    if photo and photo.filename != "":
+        filename = secure_filename(photo.filename)
+        photo.save(os.path.join(app.config["PROFILE_UPLOAD"], filename))
+        current_user.profile_photo = filename
+
+    db.session.commit()
+
+    flash("Profile updated successfully")
+
+    return redirect("/profile")
+
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -240,10 +273,17 @@ class User(UserMixin, db.Model):
     ai_uses_today = db.Column(db.Integer, default=0)
     ai_last_reset = db.Column(db.DateTime)
     email_verified = db.Column(db.Boolean, default=False)
-
-    verification_token = db.Column(db.String(200), nullable=True)
-    verification_token_expiry = db.Column(db.DateTime, nullable=True)
+    profile_photo = db.Column(db.String(200))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    country = db.Column(db.String(100))
+    pincode = db.Column(db.String(20))
+    badge = db.Column(db.String(50), default="Member")
+    
+verification_token = db.Column(db.String(200), nullable=True)
+verification_token_expiry = db.Column(db.DateTime, nullable=True)
 class Post(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
@@ -720,6 +760,7 @@ def create_news():
         if image_file and image_file.filename != "":
             filename = secure_filename(image_file.filename)
             image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            
 
         news = News(
             title=request.form["title"],
@@ -735,6 +776,23 @@ def create_news():
 
 from flask import jsonify
 import requests
+# ================= LEGAL PAGES =================
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/disclaimer")
+def disclaimer():
+    return render_template("disclaimer.html")
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
 # ================= FORGOT PASSWORD =================
 
 @app.route("/forgot-password", methods=["GET", "POST"])

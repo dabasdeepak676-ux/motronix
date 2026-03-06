@@ -34,7 +34,29 @@
                     </div>
                     <span class="profile-name">
                         <a href="/profile" class="nav-user">
-                          {{ current_user.username }}
+                          <div class="user-menu">
+
+<button class="user-button">
+{{ current_user.username }}
+</button>
+
+<div class="user-dropdown">
+
+<a href="/profile">Profile</a>
+
+<a href="/contact">Contact</a>
+
+<a href="/privacy">Privacy Policy</a>
+
+<a href="/terms">Terms of Service</a>
+
+<a href="/disclaimer">Disclaimer</a>
+
+<a href="/logout">Logout</a>
+
+</div>
+
+</div>
                           </a>
                     </span>
                 </div>
@@ -203,6 +225,28 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+
+<footer class="site-footer">
+
+<div class="footer-container">
+
+<p>© 2026 Motronix Automotive Intelligence Platform</p>
+
+<div class="footer-links">
+
+<a href="/privacy">Privacy Policy</a>
+
+<a href="/terms">Terms of Service</a>
+
+<a href="/disclaimer">Disclaimer</a>
+
+<a href="/contact">Contact</a>
+
+</div>
+
+</div>
+
+</footer>
 
 </body>
 </html>

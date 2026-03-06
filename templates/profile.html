@@ -31,6 +31,7 @@
 
 <div class="profile-row">
 <span>Username</span>
+<span class="badge">{{ current_user.badge }}</span>
 <strong>{{ current_user.username }}</strong>
 </div>
 
@@ -38,7 +39,25 @@
 <span>Email</span>
 <strong>{{ current_user.email }}</strong>
 </div>
+<form action="/update-profile" method="POST" enctype="multipart/form-data">
 
+<h3>Location</h3>
+
+<input type="text" name="city" placeholder="City" value="{{ current_user.city or '' }}">
+
+<input type="text" name="state" placeholder="State" value="{{ current_user.state or '' }}">
+
+<input type="text" name="country" placeholder="Country" value="{{ current_user.country or '' }}">
+
+<input type="text" name="pincode" placeholder="Pincode" value="{{ current_user.pincode or '' }}">
+
+<h3>Profile Photo</h3>
+
+<input type="file" name="photo">
+
+<button type="submit">Save Profile</button>
+
+</form>
 <div class="profile-row">
 <span>Mobile</span>
 <strong>{{ current_user.mobile or "Not added" }}</strong>
