@@ -41,15 +41,23 @@
 </div>
 <form action="/update-profile" method="POST" enctype="multipart/form-data">
 
-<h3>Location</h3>
+<h3 class="profile-section">Location</h3>
 
-<input type="text" name="city" placeholder="City" value="{{ current_user.city or '' }}">
+<div class="profile-grid">
 
-<input type="text" name="state" placeholder="State" value="{{ current_user.state or '' }}">
+<input type="text" name="city" placeholder="City"
+value="{{ current_user.city or '' }}" class="profile-input">
 
-<input type="text" name="country" placeholder="Country" value="{{ current_user.country or '' }}">
+<input type="text" name="state" placeholder="State"
+value="{{ current_user.state or '' }}" class="profile-input">
 
-<input type="text" name="pincode" placeholder="Pincode" value="{{ current_user.pincode or '' }}">
+<input type="text" name="country" placeholder="Country"
+value="{{ current_user.country or '' }}" class="profile-input">
+
+<input type="text" name="pincode" placeholder="Pincode"
+value="{{ current_user.pincode or '' }}" class="profile-input">
+
+</div>
 
 <h3>Profile Photo</h3>
 

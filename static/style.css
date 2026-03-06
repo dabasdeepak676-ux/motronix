@@ -1846,3 +1846,50 @@ color:white;
 .user-menu:hover .user-dropdown{
 display:block;
 }
+.profile-section{
+margin-top:30px;
+margin-bottom:10px;
+font-size:20px;
+font-weight:600;
+text-align:center;
+}
+
+.profile-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+margin-top:10px;
+}
+
+.profile-input{
+background:#111;
+border:1px solid #333;
+color:white;
+padding:12px;
+border-radius:8px;
+outline:none;
+}
+
+.profile-input::placeholder{
+color:#777;
+}
+
+.profile-input:focus{
+border:1px solid #ff3b3b;
+}
+
+.profile-photo-upload{
+display:flex;
+justify-content:center;
+gap:15px;
+margin-top:15px;
+align-items:center;
+}
+
+.file-input{
+background:#111;
+color:white;
+border:1px solid #333;
+padding:10px;
+border-radius:8px;
+}

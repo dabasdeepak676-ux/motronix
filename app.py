@@ -261,27 +261,39 @@ KNOWLEDGE_BASE = {
 # ================= MODELS =================
 
 class User(UserMixin, db.Model):
+
     is_banned = db.Column(db.Boolean, default=False)
+
     reset_token = db.Column(db.String(200), nullable=True)
     reset_token_expiry = db.Column(db.DateTime, nullable=True)
+
+    verification_token = db.Column(db.String(200), nullable=True)
+    verification_token_expiry = db.Column(db.DateTime, nullable=True)
+
     id = db.Column(db.Integer, primary_key=True)
+
     username = db.Column(db.String(100), unique=True, nullable=False)
     mobile = db.Column(db.String(20))
+
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
+
     role = db.Column(db.String(20), default="user")
+
     ai_uses_today = db.Column(db.Integer, default=0)
     ai_last_reset = db.Column(db.DateTime)
+
     email_verified = db.Column(db.Boolean, default=False)
+
     profile_photo = db.Column(db.String(200))
+
     city = db.Column(db.String(100))
     state = db.Column(db.String(100))
     country = db.Column(db.String(100))
     pincode = db.Column(db.String(20))
+
     badge = db.Column(db.String(50), default="Member")
     
-verification_token = db.Column(db.String(200), nullable=True)
-verification_token_expiry = db.Column(db.DateTime, nullable=True)
 class Post(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
