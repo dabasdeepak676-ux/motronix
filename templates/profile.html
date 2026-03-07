@@ -3,7 +3,6 @@
 {% block content %}
 
 <div class="auth-wrapper">
-
 <div class="auth-container">
 
 <h2 class="auth-title">My Profile</h2>
@@ -40,6 +39,11 @@
 <strong>{{ current_user.reputation }}</strong>
 </div>
 
+<!-- PROFILE UPDATE FORM -->
+<form action="/update-profile" method="POST" enctype="multipart/form-data">
+
+<h3 class="profile-section">Location</h3>
+
 <input type="text" name="city" placeholder="City"
 value="{{ current_user.city or '' }}" class="profile-input">
 
@@ -52,7 +56,15 @@ value="{{ current_user.country or '' }}" class="profile-input">
 <input type="text" name="pincode" placeholder="Pincode"
 value="{{ current_user.pincode or '' }}" class="profile-input">
 
-</div>
+<h3 class="profile-section">Mobile</h3>
+
+<input
+type="text"
+name="mobile"
+placeholder="Enter mobile number"
+value="{{ current_user.mobile or '' }}"
+class="profile-input"
+/>
 
 <h3 class="profile-section">Profile Photo</h3>
 
@@ -64,15 +76,15 @@ class="profile-avatar">
 
 {% endif %}
 
-<div class="profile-photo-upload">
+<input type="file" name="profile_photo" class="file-input">
 
-<input type="file" name="photo" class="file-input">
+<br><br>
 
 <button type="submit" class="auth-button">
 Save Profile
 </button>
 
-</div>
+</form>
 
 </div>
 
@@ -88,24 +100,7 @@ Add Car
 
 </div>
 
-<form method="POST" class="profile-form">
-
-<input
-type="text"
-name="mobile"
-placeholder="Enter mobile number"
-value="{{ current_user.mobile or '' }}"
-class="auth-input"
-/>
-
-<button type="submit" class="auth-button">
-Save Mobile
-</button>
-
-</form>
-
 </div>
-
 </div>
 
 {% endblock %}

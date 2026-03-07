@@ -176,21 +176,21 @@ if not os.path.exists(PROFILE_UPLOAD):
 @login_required
 def update_profile():
 
-    city = request.form.get("city")
-    state = request.form.get("state")
-    country = request.form.get("country")
-    pincode = request.form.get("pincode")
+    current_user.city = request.form.get("city")
+    current_user.state = request.form.get("state")
+    current_user.country = request.form.get("country")
+    current_user.pincode = request.form.get("pincode")
+    current_user.mobile = request.form.get("mobile")
 
-    current_user.city = city
-    current_user.state = state
-    current_user.country = country
-    current_user.pincode = pincode
-
-    photo = request.files.get("photo")
+    photo = request.files.get("profile_photo")
 
     if photo and photo.filename != "":
         filename = secure_filename(photo.filename)
-        photo.save(os.path.join(app.config["PROFILE_UPLOAD"], filename))
+
+        save_path = os.path.join(app.config["PROFILE_UPLOAD"], filename)
+
+        photo.save(save_path)
+
         current_user.profile_photo = filename
 
     db.session.commit()
@@ -669,9 +669,7 @@ def create():
 
         db.session.add(post)
 
-        # reputation update
         current_user.posts_count += 1
-        current_user.reputation += 10
 
         update_user_reputation(current_user)
 
@@ -679,7 +677,6 @@ def create():
 
         return redirect("/community")
 
-    return render_template("create.html")
 
 # ================= POST DETAIL =================
 
