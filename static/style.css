@@ -204,7 +204,7 @@ justify-content:center;
 gap:10px;
 }
 .glow-text{
-font-size:46px;
+font-size:70px;
 font-weight:700;
 color:white;
 text-shadow:0 0 18px rgba(255,0,0,0.6);
@@ -1515,6 +1515,7 @@ transition:0.2s;
 
 .auth-button:hover{
 background:#ff5555;
+transform:scale(1.03);
 }
 
 /* BACK LINK */
@@ -1892,4 +1893,167 @@ color:white;
 border:1px solid #333;
 padding:10px;
 border-radius:8px;
+}
+
+
+
+/* ================= AI BADGE ================= */
+
+.ai-promo-badge{
+margin-top:35px;
+background:linear-gradient(90deg,#ff3c3c,#b30000);
+padding:14px 32px;
+border-radius:40px;
+display:inline-block;
+font-weight:600;
+max-width:420px;
+text-align:center;
+box-shadow:0 0 25px rgba(255,0,0,0.6);
+}
+
+/* ================= CTA ================= */
+
+.cta-group{
+text-align:center;
+margin-top:30px;
+}
+
+/* ================= FEATURES ================= */
+
+.premium-section{
+display:flex;
+justify-content:center;
+gap:50px;
+max-width:1000px;
+margin:40px auto;
+text-align:center;
+}
+
+.feature-box{
+max-width:260px;
+}
+.features-row{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:50px;
+max-width:900px;
+margin:50px auto;
+text-align:center;
+}
+
+.feature-box{
+width:240px;
+}
+
+.community-center{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+}
+/* ================= FOUNDER ================= */
+
+.founder-highlight{
+text-align:center;
+margin:80px 0;
+}
+
+/* ================= MOTRONIX HERO CLEAN ================= */
+
+.hero-main{
+display:grid;
+grid-template-columns:1fr 1fr;
+align-items:center;
+max-width:1300px;
+margin:auto;
+padding:40px 60px;
+gap:40px;
+}
+
+.hero-left{
+display:flex;
+flex-direction:column;
+gap:22px;
+max-width:520px;
+}
+
+.glow-text{
+font-size:64px;
+font-weight:700;
+color:white;
+text-shadow:0 0 25px rgba(255,0,0,0.9);
+}
+
+.tagline{
+color:#aaa;
+font-size:18px;
+}
+
+.diagnose-card{
+background:rgba(255,0,0,0.08);
+border:1px solid rgba(255,0,0,0.25);
+padding:28px;
+border-radius:18px;
+max-width:420px;
+box-shadow:0 0 40px rgba(255,0,0,0.15);
+}
+
+.ai-promo-badge{
+margin-top:10px;
+padding:16px 32px;
+border-radius:40px;
+background:linear-gradient(90deg,#ff3b3b,#b30000);
+display:inline-block;
+font-weight:600;
+max-width:420px;
+text-align:center;
+box-shadow:0 0 35px rgba(255,0,0,0.6);
+}
+
+.cta-group{
+margin-top:20px;
+}
+
+.hero-right{
+display:flex;
+justify-content:flex-end;
+align-items:center;
+}
+
+.hero-mechanic{
+max-height:600px;
+object-fit:contain;
+mix-blend-mode:screen;
+filter:drop-shadow(0 0 120px rgba(255,0,0,0.35));
+}
+.post-meta{
+font-size:13px;
+color:#aaa;
+margin-bottom:8px;
+display:flex;
+gap:12px;
+align-items:center;
+}
+.hero-mechanic{
+pointer-events:none;
+}
+
+.post-author{
+color:#ff3b3b;
+font-weight:600;
+}
+.hero-main{
+position:relative;
+z-index:1;
+}
+
+.hero-left{
+position:relative;
+z-index:2;
+}
+
+.hero-right{
+position:relative;
+z-index:1;
 }

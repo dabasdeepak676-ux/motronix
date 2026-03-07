@@ -573,11 +573,12 @@ def profile():
 @login_required
 def community():
 
-    posts = Post.query.order_by(Post.id.desc()).all()
+   posts = Post.query.order_by(Post.id.desc()).all()
 
-    return render_template("community.html", posts=posts)
+   for post in posts:
+       post.author = User.query.get(post.user_id)
 
-
+   return render_template("community.html", posts=posts)
 # ================= ADD CAR =================
 
 @app.route("/add-car", methods=["GET", "POST"])
@@ -670,12 +671,13 @@ def create():
         db.session.add(post)
 
         current_user.posts_count += 1
-
         update_user_reputation(current_user)
 
         db.session.commit()
 
         return redirect("/community")
+
+    return render_template("create.html")
 
 
 # ================= POST DETAIL =================
@@ -1135,11 +1137,9 @@ def remove_admin(user_id):
 
 # ================= DB INIT =================
 with app.app_context():
-    db.drop_all()
     db.create_all()
 
 # ================= START SERVER =================
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)

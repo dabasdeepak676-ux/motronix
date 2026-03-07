@@ -64,7 +64,21 @@
                    class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('user_id','equalto',current_user.id)|list|length > 0 %}voted{% endif %}">
                     🔥 {{ post.votes|length }}
                 </a>
+<div class="post-meta">
 
+<span class="post-author">
+{{ post.author.username }}
+</span>
+
+<span class="post-location">
+
+{% if post.author.city %}
+📍 {{ post.author.city }}
+{% endif %}
+
+</span>
+
+</div>
                 <a href="{{ url_for('post_detail', post_id=post.id) }}"
                    style="color:#888; text-decoration:none; font-size:14px;">
                     💬 {{ post.comments|length }} replies
