@@ -31,19 +31,14 @@
 
 <div class="profile-row">
 <span>Username</span>
-<span class="badge">{{ current_user.badge }}</span>
 <strong>{{ current_user.username }}</strong>
+<span class="badge">{{ current_user.badge }}</span>
 </div>
 
 <div class="profile-row">
-<span>Email</span>
-<strong>{{ current_user.email }}</strong>
+<span>Reputation</span>
+<strong>{{ current_user.reputation }}</strong>
 </div>
-<form action="/update-profile" method="POST" enctype="multipart/form-data">
-
-<h3 class="profile-section">Location</h3>
-
-<div class="profile-grid">
 
 <input type="text" name="city" placeholder="City"
 value="{{ current_user.city or '' }}" class="profile-input">
@@ -59,16 +54,24 @@ value="{{ current_user.pincode or '' }}" class="profile-input">
 
 </div>
 
-<h3>Profile Photo</h3>
+<h3 class="profile-section">Profile Photo</h3>
 
-<input type="file" name="photo">
+{% if current_user.profile_photo %}
 
-<button type="submit">Save Profile</button>
+<img 
+src="{{ url_for('static', filename='profile_images/' + current_user.profile_photo) }}" 
+class="profile-avatar">
 
-</form>
-<div class="profile-row">
-<span>Mobile</span>
-<strong>{{ current_user.mobile or "Not added" }}</strong>
+{% endif %}
+
+<div class="profile-photo-upload">
+
+<input type="file" name="photo" class="file-input">
+
+<button type="submit" class="auth-button">
+Save Profile
+</button>
+
 </div>
 
 </div>
@@ -91,6 +94,7 @@ Add Car
 type="text"
 name="mobile"
 placeholder="Enter mobile number"
+value="{{ current_user.mobile or '' }}"
 class="auth-input"
 />
 

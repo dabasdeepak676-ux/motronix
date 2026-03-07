@@ -351,8 +351,6 @@ def update_user_reputation(user):
     else:
         user.badge = "Member"
 
-    db.session.commit()
-
 
 # ================= CAR MODEL =================
 
