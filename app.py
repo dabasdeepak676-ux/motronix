@@ -1419,13 +1419,18 @@ def remove_admin(user_id):
     return redirect("/admin")
 
 # ================= DB INIT =================
-@app.route("/reset-database-123")
-def reset_database():
+@app.route("/fix-post-image")
+def fix_post_image():
 
-    db.drop_all()
-    db.create_all()
+    from sqlalchemy import text
 
-    return "Database reset successful"
+    db.session.execute(text(
+        "ALTER TABLE post ADD COLUMN image VARCHAR(200);"
+    ))
+
+    db.session.commit()
+
+    return "Column added"
 
 # ================= START SERVER =================
 
