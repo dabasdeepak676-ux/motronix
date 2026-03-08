@@ -154,10 +154,10 @@ def safe_image_check(file_path):
     except:
         return False
 ADMIN_EMAILS = [
-    "dabasdeepak676@gmail.com",
-    "riteshsingh1609@gmail.com",
-    "channelspeed16@gmail.com",
-    "mechanicalbull@gmail.com"
+"dabasdeepak676@gmail.com",
+"riteshsingh1609@gmail.com",
+"channelspeed16@gmail.com",
+"mechanicalbull@gmail.com"
 ]
 @app.context_processor
 def inject_admin_emails():
