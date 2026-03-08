@@ -115,6 +115,7 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 app = Flask(__name__)
+print("Motronix server booting...")
 # ================= FILE SIZE LIMIT =================
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 
@@ -1423,5 +1424,13 @@ def remove_admin(user_id):
 # ================= START SERVER =================
 
 if __name__ == "__main__":
+
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+
+    print("Starting Motronix server on port:", port)
+
+    app.run(
+        host="0.0.0.0",
+        port=port,
+        debug=False
+    )
