@@ -93,10 +93,10 @@ def rank_failures(problem_text, failure_database):
 
         if detected_component:
 
-            component = failure.get("component", "").lower()
+            ccomponent = failure.get("component", "").lower()
 
-            if detected_component in component:
-                score += 15
+            if detected_component and detected_component in component:
+               score += 15
 
         # -------------------------
         # EXTRA COMPONENT BOOST
@@ -106,8 +106,8 @@ def rank_failures(problem_text, failure_database):
 
         for comp in components:
 
-            if comp in component:
-                score += 10
+            if comp and comp in component:
+              score += 10
 
         if score <= 5:
             continue

@@ -1,4 +1,4 @@
-# component_detector.py
+# ai_engine/component_detector.py
 
 def detect_components(problem_text):
 
@@ -13,7 +13,9 @@ def detect_components(problem_text):
         "disc",
         "rotor",
         "caliper",
-        "pad"
+        "pad",
+        "abs",
+        "stopping"
     ]
 
     engine_words = [
@@ -21,7 +23,9 @@ def detect_components(problem_text):
         "misfire",
         "power loss",
         "stall",
-        "knocking"
+        "knocking",
+        "rpm",
+        "engine shaking"
     ]
 
     electrical_words = [
@@ -30,22 +34,27 @@ def detect_components(problem_text):
         "alternator",
         "fuse",
         "not starting",
-        "no start"
+        "no start",
+        "relay",
+        "sensor"
     ]
 
     cooling_words = [
         "overheat",
+        "overheating",
         "coolant",
         "radiator",
         "temperature",
-        "fan"
+        "fan",
+        "water pump"
     ]
 
     steering_words = [
         "steering",
         "alignment",
         "pulling",
-        "vibration"
+        "steering vibration",
+        "hard steering"
     ]
 
     ac_words = [
@@ -53,7 +62,33 @@ def detect_components(problem_text):
         "cooling",
         "compressor",
         "air conditioning",
-        "blower"
+        "blower",
+        "weak cooling"
+    ]
+
+    fuel_words = [
+        "fuel",
+        "injector",
+        "fuel pump",
+        "fuel smell",
+        "fuel pressure"
+    ]
+
+    transmission_words = [
+        "gear",
+        "gearbox",
+        "shifting",
+        "gear slipping",
+        "clutch"
+    ]
+
+    suspension_words = [
+        "shock",
+        "suspension",
+        "bump",
+        "clunk",
+        "wheel bearing",
+        "cv joint"
     ]
 
     # brake
@@ -85,5 +120,23 @@ def detect_components(problem_text):
     for word in ac_words:
         if word in text:
             components.append("ac")
+
+    # fuel
+    for word in fuel_words:
+        if word in text:
+            components.append("fuel")
+
+    # transmission
+    for word in transmission_words:
+        if word in text:
+            components.append("transmission")
+
+    # suspension
+    for word in suspension_words:
+        if word in text:
+            components.append("suspension")
+
+    # remove duplicates
+    components = list(set(components))
 
     return components

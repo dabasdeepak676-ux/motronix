@@ -25,11 +25,11 @@
 Confidence: {{ results[0].confidence }}%
 </p>
 
-<p>Severity: {{ results[0].severity }}</p>
+<p><b>Severity:</b> {{ results[0].severity }}</p>
 
 {% if results[0].repair_cost %}
 <p>
-Estimated Repair:
+<b>Estimated Repair:</b>
 ₹{{ results[0].repair_cost.min }} – ₹{{ results[0].repair_cost.max }}
 </p>
 {% endif %}
@@ -49,7 +49,18 @@ Estimated Repair:
 
 <h4>{{ r.issue }}</h4>
 
-<p>Confidence: {{ r.confidence }}%</p>
+<p><b>Confidence:</b> {{ r.confidence }}%</p>
+
+{% if r.severity %}
+<p><b>Severity:</b> {{ r.severity }}</p>
+{% endif %}
+
+{% if r.repair_cost %}
+<p>
+<b>Estimated Repair:</b>
+₹{{ r.repair_cost.min }} – ₹{{ r.repair_cost.max }}
+</p>
+{% endif %}
 
 {% if r.explanation %}
 

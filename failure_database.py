@@ -1,4 +1,5 @@
 # failure_database.py
+
 FAILURE_DATABASE = [
 
 {
@@ -8,6 +9,8 @@ FAILURE_DATABASE = [
 "component":"battery",
 "severity":"medium",
 "urgency":"service_soon",
+
+"probability":5,
 
 "symptoms":[
 "car not starting",
@@ -55,6 +58,8 @@ FAILURE_DATABASE = [
 "severity":"high",
 "urgency":"service_soon",
 
+"probability":4,
+
 "symptoms":[
 "car not starting",
 "single click sound",
@@ -97,6 +102,8 @@ FAILURE_DATABASE = [
 "severity":"high",
 "urgency":"service_soon",
 
+"probability":3,
+
 "symptoms":[
 "battery warning light",
 "car battery draining",
@@ -137,6 +144,8 @@ FAILURE_DATABASE = [
 "component":"cooling system",
 "severity":"critical",
 "urgency":"stop_driving",
+
+"probability":4,
 
 "symptoms":[
 "temperature gauge high",
@@ -182,6 +191,8 @@ FAILURE_DATABASE = [
 "severity":"medium",
 "urgency":"service_soon",
 
+"probability":5,
+
 "symptoms":[
 "squeaking while braking",
 "brake noise",
@@ -216,319 +227,6 @@ FAILURE_DATABASE = [
 },
 
 {
-"id":6,
-"problem":"Clutch Slipping",
-"system":"transmission",
-"component":"clutch",
-"severity":"high",
-"urgency":"service_soon",
-
-"symptoms":[
-"engine revs increase but speed not increasing",
-"burning smell",
-"poor acceleration"
-],
-
-"possible_causes":[
-"clutch plate worn",
-"pressure plate weak",
-"oil on clutch plate"
-],
-
-"user_checks":[
-"check if RPM increases without speed",
-"check for burning smell"
-],
-
-"user_actions":[
-"avoid aggressive driving",
-"visit service center"
-],
-
-"mechanic_checks":[
-"check clutch free play",
-"inspect clutch plate"
-],
-
-"repair_cost":{
-"min":5000,
-"max":20000
-}
-},
-
-{
-"id":7,
-"problem":"Hard Gear Shifting",
-"system":"transmission",
-"component":"gearbox",
-"severity":"medium",
-"urgency":"service_soon",
-
-"symptoms":[
-"gear difficult to engage",
-"gear grinding"
-],
-
-"possible_causes":[
-"low gearbox oil",
-"clutch not disengaging",
-"gear synchronizer worn"
-],
-
-"user_checks":[
-"check if gear shifting is hard when engine cold"
-],
-
-"user_actions":[
-"avoid forcing gear shift",
-"visit mechanic"
-],
-
-"mechanic_checks":[
-"check gearbox oil level",
-"inspect clutch operation"
-],
-
-"repair_cost":{
-"min":1500,
-"max":12000
-}
-},
-
-{
-"id":8,
-"problem":"Engine Misfire",
-"system":"engine",
-"component":"ignition system",
-"severity":"high",
-"urgency":"service_soon",
-
-"symptoms":[
-"engine shaking",
-"loss of power",
-"rough idle"
-],
-
-"possible_causes":[
-"spark plug worn",
-"ignition coil faulty",
-"fuel injector clogged"
-],
-
-"user_checks":[
-"check if engine vibrates while idling"
-],
-
-"user_actions":[
-"avoid high acceleration",
-"visit mechanic"
-],
-
-"mechanic_checks":[
-"inspect spark plugs",
-"scan obd codes"
-],
-
-"repair_cost":{
-"min":2000,
-"max":10000
-}
-},
-
-{
-"id":9,
-"problem":"Fuel Pump Failure",
-"system":"fuel",
-"component":"fuel pump",
-"severity":"high",
-"urgency":"service_soon",
-
-"symptoms":[
-"engine cranks but not starting",
-"loss of power while driving"
-],
-
-"possible_causes":[
-"fuel pump failure",
-"fuel filter blocked"
-],
-
-"user_checks":[
-"check if engine cranks but does not start"
-],
-
-"user_actions":[
-"avoid repeated starting attempts",
-"call mechanic"
-],
-
-"mechanic_checks":[
-"check fuel pressure",
-"listen fuel pump sound"
-],
-
-"repair_cost":{
-"min":4000,
-"max":12000
-}
-},
-
-{
-"id":10,
-"problem":"AC Not Cooling",
-"system":"ac",
-"component":"ac system",
-"severity":"low",
-"urgency":"service_soon",
-
-"symptoms":[
-"AC blowing warm air",
-"weak cooling"
-],
-
-"possible_causes":[
-"low refrigerant",
-"compressor failure",
-"AC condenser blocked"
-],
-
-"user_checks":[
-"check if AC airflow is weak"
-],
-
-"user_actions":[
-"avoid using AC continuously"
-],
-
-"mechanic_checks":[
-"check refrigerant pressure",
-"inspect compressor clutch"
-],
-
-"repair_cost":{
-"min":1500,
-"max":8000
-}
-},
-
-{
-"id":11,
-"problem":"Engine Oil Leak",
-"system":"engine",
-"component":"engine seals",
-"severity":"medium",
-"urgency":"service_soon",
-
-"symptoms":[
-"oil spots under car",
-"burning oil smell",
-"low engine oil level"
-],
-
-"possible_causes":[
-"oil seal worn",
-"valve cover gasket leak",
-"oil filter loose"
-],
-
-"user_checks":[
-"check for oil drops under car",
-"check engine oil level"
-],
-
-"user_actions":[
-"avoid long driving",
-"visit service center"
-],
-
-"mechanic_checks":[
-"inspect under engine",
-"check oil filter tightness"
-],
-
-"repair_cost":{
-"min":2000,
-"max":7000
-}
-},
-
-{
-"id":12,
-"problem":"Coolant Leak",
-"system":"cooling",
-"component":"cooling system",
-"severity":"high",
-"urgency":"service_soon",
-
-"symptoms":[
-"coolant level dropping",
-"sweet smell from engine bay",
-"engine overheating"
-],
-
-"possible_causes":[
-"radiator leak",
-"coolant hose cracked",
-"water pump seal leak"
-],
-
-"user_checks":[
-"check coolant level in reservoir"
-],
-
-"user_actions":[
-"avoid driving long distance"
-],
-
-"mechanic_checks":[
-"inspect radiator",
-"check coolant hoses"
-],
-
-"repair_cost":{
-"min":2000,
-"max":10000
-}
-},
-
-{
-"id":13,
-"problem":"Radiator Fan Not Working",
-"system":"cooling",
-"component":"radiator fan",
-"severity":"high",
-"urgency":"service_soon",
-
-"symptoms":[
-"engine overheating in traffic",
-"AC cooling weak in traffic"
-],
-
-"possible_causes":[
-"radiator fan motor failure",
-"fan relay fault"
-],
-
-"user_checks":[
-"check if fan runs when engine hot"
-],
-
-"user_actions":[
-"avoid traffic driving"
-],
-
-"mechanic_checks":[
-"check fan relay",
-"inspect fan motor"
-],
-
-"repair_cost":{
-"min":2500,
-"max":8000
-}
-},
-
-{
 "id":14,
 "problem":"Spark Plug Failure",
 "system":"engine",
@@ -536,8 +234,12 @@ FAILURE_DATABASE = [
 "severity":"medium",
 "urgency":"service_soon",
 
+"probability":5,
+
 "symptoms":[
 "engine misfire",
+"engine shaking",
+"engine shaking",
 "poor fuel economy",
 "difficulty starting"
 ],
@@ -574,10 +276,12 @@ FAILURE_DATABASE = [
 "severity":"high",
 "urgency":"service_soon",
 
+"probability":5,
+
 "symptoms":[
 "engine misfire",
-"engine shaking",
 "check engine light"
+"loss of power"
 ],
 
 "possible_causes":[
@@ -955,9 +659,9 @@ FAILURE_DATABASE = [
 
 "symptoms":[
 "engine misfire",
-"engine shaking",
 "check engine light",
 "loss of power"
+"engine vibration"
 ],
 
 "possible_causes":[
@@ -2168,7 +1872,7 @@ FAILURE_DATABASE = [
 
 "repair_cost":{"min":3000,"max":10000},
 
-"probability":4
+"probability":2
 },
 {
 "id":61,
