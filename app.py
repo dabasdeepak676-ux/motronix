@@ -1419,8 +1419,13 @@ def remove_admin(user_id):
     return redirect("/admin")
 
 # ================= DB INIT =================
-with app.app_context():
+@app.route("/reset-database-123")
+def reset_database():
+
+    db.drop_all()
     db.create_all()
+
+    return "Database reset successful"
 
 # ================= START SERVER =================
 
