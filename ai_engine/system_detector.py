@@ -1,23 +1,33 @@
+# ai_engine/system_detector.py
+
 def detect_system(problem_text):
 
     text = problem_text.lower()
 
     systems = {
 
-        "brake":[
-            "brake","braking","pedal","disc","rotor","caliper","abs","stopping"
+        "engine":[
+            "engine","misfire","stall","power loss","loss of power",
+            "smoke","knocking","rpm","engine shaking","engine vibration"
         ],
 
-        "engine":[
-            "engine","misfire","stall","power loss","smoke","knocking","rpm","engine shaking"
+        "brake":[
+            "brake","braking","pedal","disc","rotor","caliper","pad",
+            "abs","stopping","brake noise"
         ],
 
         "electrical":[
-            "battery","starter","alternator","fuse","relay","sensor","not starting","no start"
+            "battery","starter","alternator","fuse","relay","sensor",
+            "not starting","no start","clicking sound"
         ],
 
         "cooling":[
-            "overheat","overheating","coolant","radiator","temperature","fan","water pump"
+            "overheat","overheating","coolant","radiator","temperature",
+            "fan","water pump"
+        ],
+
+        "transmission":[
+            "gear","gearbox","shifting","gear slipping","clutch"
         ],
 
         "steering":[
@@ -32,12 +42,8 @@ def detect_system(problem_text):
             "fuel","injector","fuel pump","fuel smell","fuel pressure"
         ],
 
-        "transmission":[
-            "gear","gearbox","shifting","clutch","gear slipping"
-        ],
-
         "ac":[
-            "ac","air conditioning","compressor","blower","weak cooling"
+            " ac ","air conditioning","compressor","blower","weak cooling"
         ],
 
         "exhaust":[
@@ -50,11 +56,35 @@ def detect_system(problem_text):
 
     }
 
+    scores = {}
+
+    # -----------------------------
+    # count keyword matches
+    # -----------------------------
+
     for system, words in systems.items():
+
+        score = 0
 
         for word in words:
 
             if word in text:
-                return system
+                score += 1
 
-    return None
+        if score > 0:
+            scores[system] = score
+
+    # -----------------------------
+    # no match
+    # -----------------------------
+
+    if not scores:
+        return None
+
+    # -----------------------------
+    # return highest match system
+    # -----------------------------
+
+    detected_system = max(scores, key=scores.get)
+
+    return detected_system

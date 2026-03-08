@@ -1,11 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="post-card">
-    <h1>{{ news.title }}</h1>
-    <p style="color:#aaa;">{{ news.created_at.strftime("%d %b %Y") }}</p>
-    <hr>
-    <p>{{ news.content }}</p>
+<div style="max-width:900px;margin:auto;padding:40px 20px;">
+
+<h1 style="margin-bottom:20px;">
+{{ news.title }}
+</h1>
+
+{% if news.image %}
+
+<img
+src="{{ url_for('static', filename='news_images/' + news.image) }}"
+style="width:100%;border-radius:10px;margin-bottom:20px;"
+>
+
+{% endif %}
+
+<p style="color:#bbb;margin-bottom:30px;">
+{{ news.created_at.strftime('%d %B %Y') }}
+</p>
+
+<div style="line-height:1.8;font-size:16px;">
+{{ news.content }}
+</div>
+
 </div>
 
 {% endblock %}

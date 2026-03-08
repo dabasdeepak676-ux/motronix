@@ -10,7 +10,8 @@
 
 <div class="diagnose-card">
 
-<h2>AI Car Diagnose</h2>
+<h2>Car Diagnose</h2>
+<h2>Motronix AI Brain V1 - Beta</h2>
 
 {% if default_car %}
 
@@ -92,28 +93,55 @@ Create Account
 </div>
 
 
-<<div class="hero-right">
+<!-- RIGHT SIDE -->
 
-<img
-src="{{ url_for('static', filename='images/mechanic.png') }}"
-class="hero-mechanic"
->
+<div class="hero-right">
 
-<div class="hero-info">
+<!-- SPEED16 BRANDING -->
 
-<div class="info-card">
-<h4>AI Diagnose</h4>
+<div class="speed16-hero">
+
+<h2>
+<span class="red">Powered by</span> Speed16
+</h2>
+
+<div class="speed16-icons">
+
+<a href="https://youtube.com/@speed16" target="_blank">
+<i class="fab fa-youtube"></i>
+</a>
+
+<a href="https://instagram.com/speed16" target="_blank">
+<i class="fab fa-instagram"></i>
+</a>
+
+</div>
+
+<p class="founder-line">
+Founded by Ritesh — Engineer & Automotive Influencer
+</p>
+
+</div>
+
+
+<img src="{{ url_for('static', filename='images/mechanic.PNG') }}" class="mechanic-img">
+
+
+<div class="hero-features">
+
+<div class="feature-item">
+<h3>AI Diagnose</h3>
 <p>500+ failures mapped</p>
 </div>
 
-<div class="info-card">
-<h4>Community</h4>
+<div class="feature-item">
+<h3>Community</h3>
 <p>Real owner discussions</p>
 </div>
 
-<div class="info-card">
-<h4>Knowledge</h4>
-<p>Automotive handbook</p>
+<div class="feature-item">
+<h3>Knowledge</h3>
+<p>Smart Automotive Ecosystem</p>
 </div>
 
 </div>
@@ -155,7 +183,3 @@ Passionate about simplifying the automotive ecosystem for smarter decisions.
 </section>
 
 {% endblock %}
-
-
-
-

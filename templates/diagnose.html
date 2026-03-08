@@ -12,31 +12,36 @@
 
             <!-- Select Car -->
             <select name="car_id" class="auth-input" required>
-
                 {% for car in cars %}
-
-                    <option value="{{ car.id }}">
-                        {{ car.brand }} {{ car.model }} ({{ car.year }})
-                    </option>
-
+                <option value="{{ car.id }}">
+                    {{ car.brand }} {{ car.model }} ({{ car.year }})
+                </option>
                 {% endfor %}
-
             </select>
 
+
             <!-- Problem Description -->
-            <textarea
-                name="problem"
-                placeholder="Describe your car problem (example: vibration while braking, car not starting, engine overheating)"
-                class="auth-input"
-                style="height:120px"
-                required
-            ></textarea>
+            <div class="problem-wrapper">
+
+                <textarea
+                    id="problem"
+                    name="problem"
+                    class="auth-input"
+                    placeholder="Describe your car problem (example: vibration while braking, car not starting, engine overheating)"
+                    style="height:120px"
+                    onkeyup="loadSuggestions()"
+                    required
+                ></textarea>
+
+                <!-- Suggestions -->
+                <div id="suggestions" class="suggestion-box"></div>
+
+            </div>
+
 
             <!-- Submit Button -->
             <button type="submit" class="auth-button">
-
                 Diagnose Problem
-
             </button>
 
         </form>
@@ -44,5 +49,56 @@
     </div>
 
 </div>
+
+
+<script>
+
+async function loadSuggestions(){
+
+    const input = document.getElementById("problem")
+    const box = document.getElementById("suggestions")
+
+    const query = input.value.trim()
+
+    if(query.length < 2){
+        box.innerHTML = ""
+        return
+    }
+
+    try{
+
+        const response = await fetch("/symptom-suggest?q=" + query)
+
+        const data = await response.json()
+
+        box.innerHTML = ""
+
+        data.suggestions.forEach(function(symptom){
+
+            const div = document.createElement("div")
+
+            div.className = "suggestion-item"
+            div.innerText = symptom
+
+            div.onclick = function(){
+
+                input.value = symptom
+                box.innerHTML = ""
+
+            }
+
+            box.appendChild(div)
+
+        })
+
+    }catch(error){
+
+        console.error("Suggestion error:", error)
+
+    }
+
+}
+
+</script>
 
 {% endblock %}

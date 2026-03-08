@@ -1,95 +1,178 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<h1>Community</h1>
+<h1 style="margin-bottom:20px;">Community</h1>
 
-<a href="{{ url_for('create') }}" class="create-btn">+ Create Post</a>
+<a href="/create-post" class="create-btn">+ Create Post</a>
 
-<form method="GET" action="{{ url_for('community') }}" class="filter-bar">
+<div class="filter-bar">
 
-    <input type="text"
-           name="search"
-           placeholder="Search posts..."
-           value="{{ search_query or '' }}">
+<input type="text" placeholder="Search posts...">
 
-    <button type="submit">Search</button>
+<button>Search</button>
 
-    <div style="margin-top:15px;">
-        <a href="{{ url_for('community') }}?search={{ search_query or '' }}&sort=new"
-           class="sort-btn {% if not sort or sort == 'new' %}active-sort{% endif %}">
-            New
-        </a>
+<a href="?sort=new" class="sort-btn active-sort">New</a>
+<a href="?sort=popular" class="sort-btn">Popular</a>
 
-        <a href="{{ url_for('community') }}?search={{ search_query or '' }}&sort=popular"
-           class="sort-btn {% if sort == 'popular' %}active-sort{% endif %}">
-            Popular
-        </a>
-    </div>
+</div>
 
-</form>
+<div class="community-posts">
 
 {% if posts %}
-    {% for post in posts %}
-        <div class="post-card">
+{% for post in posts %}
 
-            <!-- Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <div style="font-size:14px;">
-                    <span style="color:#ff3b3b; font-weight:600;">
-                        {{ post.author.username }}
-                    </span>
-                </div>
-            </div>
+<div class="post-card">
 
-            <!-- Title -->
-            <h2 style="margin:6px 0 10px 0; font-size:20px; font-weight:600;">
-                <a href="{{ url_for('post_detail', post_id=post.id) }}"
-                   style="color:white; text-decoration:none;">
-                    {{ post.title }}
-                </a>
-            </h2>
+<!-- ================= HEADER ================= -->
 
-            <!-- Preview -->
-            <p style="color:#aaa; font-size:14px; line-height:1.6;">
-                {{ post.content[:180] }}...
-            </p>
+<div class="post-header">
 
-            <!-- Divider -->
-            <div style="height:1px; background:#222; margin:15px 0;"></div>
+<div class="author-left">
 
-            <!-- Actions -->
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+{% if post.author.profile_photo %}
 
-                <a href="{{ url_for('upvote', post_id=post.id) }}"
-                   class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('user_id','equalto',current_user.id)|list|length > 0 %}voted{% endif %}">
-                    🔥 {{ post.votes|length }}
-                </a>
-<div class="post-meta">
+<img 
+src="{{ url_for('static', filename='profile_images/' + post.author.profile_photo) }}"
+class="author-avatar">
 
-<span class="post-author">
+{% else %}
+
+<div class="author-avatar-letter">
+{{ post.author.username[0] | upper }}
+</div>
+
+{% endif %}
+
+<div class="author-info">
+
+<div class="author-name">
+
 {{ post.author.username }}
+
+<span class="author-badge">
+{{ post.author.badge }}
 </span>
 
-<span class="post-location">
+<span class="author-reputation">
+⭐ {{ post.author.reputation }}
+</span>
+
+</div>
+
+<div class="author-location">
 
 {% if post.author.city %}
 📍 {{ post.author.city }}
 {% endif %}
 
-</span>
+</div>
 
 </div>
-                <a href="{{ url_for('post_detail', post_id=post.id) }}"
-                   style="color:#888; text-decoration:none; font-size:14px;">
-                    💬 {{ post.comments|length }} replies
-                </a>
 
-            </div>
+</div>
 
-        </div>
-    {% endfor %}
-{% else %}
-    <p>No posts yet.</p>
+</div>
+
+
+<!-- ================= TITLE ================= -->
+
+<h2 class="post-title">
+
+<a href="{{ url_for('post_detail', post_id=post.id) }}">
+
+{{ post.title }}
+
+</a>
+
+</h2>
+
+
+<!-- ================= PREVIEW ================= -->
+
+<p class="post-preview">
+
+{{ post.content[:180] }}...
+
+</p>
+
+{% if post.image %}
+
+<img 
+src="{{ url_for('static', filename='post_images/' + post.image) }}"
+class="post-image">
+
 {% endif %}
+
+<!-- ================= TOP REPLY ================= -->
+
+<!-- TOP REPLIES -->
+
+{% if post.comments|length > 0 %}
+
+{% set top_comments = post.comments | sort(attribute="id", reverse=True) %}
+
+{% for comment in top_comments[:2] %}
+
+<div class="top-reply">
+
+<span class="top-reply-label">
+
+{% if loop.index == 1 %}
+Top Reply
+{% else %}
+2nd Reply
+{% endif %}
+
+</span>
+
+<p>
+{{ comment.content[:120] }}...
+</p>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+
+<!-- ================= DIVIDER ================= -->
+
+<div class="post-divider"></div>
+
+
+<!-- ================= ACTIONS ================= -->
+
+<div class="post-actions">
+
+<a href="{{ url_for('upvote', post_id=post.id) }}"
+class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('user_id','equalto',current_user.id)|list|length > 0 %}voted{% endif %}">
+
+🔥 {{ post.votes|length }}
+
+</a>
+
+
+<a href="{{ url_for('post_detail', post_id=post.id) }}"
+class="reply-count">
+
+💬 {{ post.comments|length }} replies
+
+</a>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p style="margin-top:30px; color:#aaa;">No posts yet.</p>
+
+{% endif %}
+
+</div>
 
 {% endblock %}

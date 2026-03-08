@@ -1,0 +1,14 @@
+/* ================= GLOBAL ================= */
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: radial-gradient(circle at top, #111 0%, #000 70%);
+    color: white;
+}
+
+.main-container {
+    max-width: 1100px;
+    margin: 20px auto;   /* pehle 40px tha */
+    padding: 0 20px;
+}

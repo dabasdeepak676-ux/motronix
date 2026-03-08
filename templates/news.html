@@ -1,45 +1,86 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+<div class="container" style="max-width:1100px;margin:auto;padding:40px 20px;">
 
-    <h1>Latest Automotive News</h1>
+<h2 style="margin-bottom:30px;">Automotive News</h2>
 
-    {% if current_user.is_authenticated and current_user.id == 1 %}
-        <a href="{{ url_for('create_news') }}" class="create-btn">
-            + Create News
-        </a>
-    {% endif %}
+{% if current_user.role == "admin" %}
+<div style="margin-bottom:25px;">
+<a href="/admin/news/create" class="auth-button">
+Create News
+</a>
+</div>
+{% endif %}
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:30px;
+">
+
+{% for news in news_items %}
+
+<div style="
+background:#111;
+border-radius:14px;
+overflow:hidden;
+border:1px solid #222;
+transition:0.3s;
+">
+
+<a href="/news/{{ news.id }}" style="text-decoration:none;color:white;">
+
+{% if news.image %}
+
+<img
+src="{{ url_for('static', filename='news_images/' + news.image) }}"
+style="width:100%;height:200px;object-fit:cover;"
+>
+
+{% endif %}
+
+<div style="padding:18px;">
+
+<h3 style="margin-bottom:10px;">
+{{ news.title }}
+</h3>
+
+<p style="color:#aaa;font-size:14px;">
+{{ news.created_at.strftime('%d %b %Y') }}
+</p>
 
 </div>
 
-{% if news_items %}
-    {% for news in news_items %}
-        <div class="post-card">
+</a>
 
-            <h2>
-                {% if news.image %}
-    <img src="{{ url_for('static', filename='news_images/' + news.image) }}"
-         style="width:100%; border-radius:8px; margin:15px 0;">
+{% if current_user.role == "admin" %}
+
+<div style="
+display:flex;
+gap:10px;
+padding:0 18px 18px;
+">
+
+<a href="/admin/news/edit/{{ news.id }}" class="outline-btn">
+Edit
+</a>
+
+<a href="/admin/news/delete/{{ news.id }}" class="auth-button"
+onclick="return confirm('Delete this news?')">
+Delete
+</a>
+
+</div>
+
 {% endif %}
-                <a href="{{ url_for('news_detail', news_id=news.id) }}" 
-                   style="color:white; text-decoration:none;">
-                    {{ news.title }}
-                </a>
-            </h2>
 
-            <p style="color:#aaa; font-size:14px;">
-                {{ news.created_at.strftime("%d %b %Y") }}
-            </p>
+</div>
 
-            <p style="color:#ccc;">
-                {{ news.content[:180] }}...
-            </p>
+{% endfor %}
 
-        </div>
-    {% endfor %}
-{% else %}
-    <p>No news published yet.</p>
-{% endif %}
+</div>
+
+</div>
 
 {% endblock %}

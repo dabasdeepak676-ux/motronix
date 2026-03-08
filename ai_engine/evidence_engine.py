@@ -2,6 +2,45 @@
 # Evidence Adjustment Engine
 # ---------------------------------------
 
+EVIDENCE_RULES = {
+
+    "Brake Pad Wear":{
+
+        "brake_noise":5,
+        "brake_vibration":-10
+    },
+
+    "Brake Disc Warped":{
+
+        "brake_vibration":15,
+        "brake_noise":5
+    },
+
+    "Brake Dust Accumulation":{
+
+        "brake_noise":5,
+        "brake_vibration":-5
+    },
+
+    "Battery Dead":{
+
+        "dashboard_lights_no":15,
+        "clicking_sound_yes":10
+    },
+
+    "Starter Motor Failure":{
+
+        "clicking_sound_yes":15
+    },
+
+    "Alternator Failure":{
+
+        "dashboard_lights_yes":10
+    }
+
+}
+
+
 def adjust_scores(results, answers):
 
     if not answers:
@@ -12,68 +51,32 @@ def adjust_scores(results, answers):
         issue = result["issue"]
         confidence = result["confidence"]
 
-        # -----------------------------------
-        # BRAKE LOGIC
-        # -----------------------------------
+        rules = EVIDENCE_RULES.get(issue)
 
-        if "Brake Pad Wear" in issue:
+        if not rules:
+            continue
 
-            if answers.get("brake_noise") == "yes":
-                confidence += 5
+        for key, value in rules.items():
 
-            if answers.get("brake_vibration") == "yes":
-                confidence -= 10
+            parts = key.split("_")
 
+            if len(parts) == 2:
 
-        if "Brake Disc Warped" in issue:
+                question = parts[0]
+                expected = parts[1]
 
-            if answers.get("brake_vibration") == "yes":
-                confidence += 15
+                if answers.get(question) == expected:
+                    confidence += value
 
-            if answers.get("brake_noise") == "yes":
-                confidence += 5
+            else:
 
+                if answers.get(key) == "yes":
+                    confidence += value
 
-        if "Brake Dust Accumulation" in issue:
-
-            if answers.get("brake_noise") == "yes":
-                confidence += 5
-
-            if answers.get("brake_vibration") == "yes":
-                confidence -= 5
-
-
-        # -----------------------------------
-        # STARTING SYSTEM
-        # -----------------------------------
-
-        if "Battery Dead" in issue:
-
-            if answers.get("dashboard_lights") == "no":
-                confidence += 15
-
-            if answers.get("clicking_sound") == "yes":
-                confidence += 10
-
-
-        if "Starter Motor Failure" in issue:
-
-            if answers.get("clicking_sound") == "yes":
-                confidence += 15
-
-
-        if "Alternator Failure" in issue:
-
-            if answers.get("dashboard_lights") == "yes":
-                confidence += 10
-
-
-        # limit
         confidence = max(5, min(confidence, 95))
 
         result["confidence"] = confidence
 
-    # sort again
     results.sort(key=lambda x: x["confidence"], reverse=True)
 
     return results

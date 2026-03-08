@@ -23,12 +23,15 @@ def filter_failures(problem_text):
         component = failure.get("component", "").lower()
         system = failure.get("system", "").lower()
 
+        symptoms = " ".join(failure.get("symptoms", []))
+        causes = " ".join(failure.get("possible_causes", []))
+
         text = (
-            failure["problem"]
+            failure.get("problem", "")
             + " "
-            + " ".join(failure["symptoms"])
+            + symptoms
             + " "
-            + " ".join(failure["possible_causes"])
+            + causes
         ).lower()
 
         for comp in components:
@@ -49,18 +52,30 @@ def filter_failures(problem_text):
 
 def diagnose_vehicle(problem_text, answers=None):
 
+    if answers is None:
+        answers = {}
+
+    problem_text = problem_text.strip().lower()
+
+    # Step 1 → Filter relevant failures
     filtered_db = filter_failures(problem_text)
 
+    # Step 2 → Rank failures
     results = rank_failures(problem_text, filtered_db)
 
-    # adjust with answers
+    # Step 3 → Adjust confidence using evidence
     results = adjust_scores(results, answers)
 
     questions = []
 
+    # Step 4 → Generate diagnostic questions
     if results:
 
         top_issue = results[0]["issue"]
-        questions = generate_questions(top_issue)
+
+        try:
+            questions = generate_questions(top_issue)
+        except:
+            questions = []
 
     return results, questions

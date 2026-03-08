@@ -1,49 +1,78 @@
 # ai_engine/diagnostic_question_engine.py
 
 
-def generate_questions(top_issue):
+QUESTION_RULES = {
 
-    questions = []
+    "brake":[
+
+        {
+            "question":"Does the noise happen only when braking?",
+            "key":"brake_noise"
+        },
+
+        {
+            "question":"Does the car vibrate when braking?",
+            "key":"brake_vibration"
+        }
+
+    ],
+
+    "battery":[
+
+        {
+            "question":"Do dashboard lights turn on when starting?",
+            "key":"dashboard_lights"
+        },
+
+        {
+            "question":"Do you hear a clicking sound while starting?",
+            "key":"clicking_sound"
+        }
+
+    ],
+
+    "starter":[
+
+        {
+            "question":"Do dashboard lights turn on when starting?",
+            "key":"dashboard_lights"
+        },
+
+        {
+            "question":"Do you hear a clicking sound while starting?",
+            "key":"clicking_sound"
+        }
+
+    ],
+
+    "cooling":[
+
+        {
+            "question":"Does temperature rise in traffic?",
+            "key":"traffic_overheat"
+        },
+
+        {
+            "question":"Do you see coolant leakage?",
+            "key":"coolant_leak"
+        }
+
+    ]
+
+}
+
+
+def generate_questions(top_issue):
 
     issue = top_issue.lower()
 
-    # brake related
-    if "brake" in issue:
+    questions = []
 
-        questions.append({
-            "question": "Does the noise happen only when braking?",
-            "key": "brake_noise"
-        })
+    for key, qlist in QUESTION_RULES.items():
 
-        questions.append({
-            "question": "Does the car vibrate when braking?",
-            "key": "brake_vibration"
-        })
+        if key in issue:
 
-    # starting related
-    if "battery" in issue or "starter" in issue:
+            questions.extend(qlist)
 
-        questions.append({
-            "question": "Do dashboard lights turn on when starting?",
-            "key": "dashboard_lights"
-        })
-
-        questions.append({
-            "question": "Do you hear a clicking sound while starting?",
-            "key": "click_sound"
-        })
-
-    # overheating
-    if "overheat" in issue or "coolant" in issue:
-
-        questions.append({
-            "question": "Does temperature rise in traffic?",
-            "key": "traffic_overheat"
-        })
-
-        questions.append({
-            "question": "Do you see coolant leakage?",
-            "key": "coolant_leak"
-        })
-
-    return questions
+    # limit questions
+    return questions[:3]

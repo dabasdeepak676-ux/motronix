@@ -25,7 +25,9 @@
 Confidence: {{ results[0].confidence }}%
 </p>
 
+{% if results[0].severity %}
 <p><b>Severity:</b> {{ results[0].severity }}</p>
+{% endif %}
 
 {% if results[0].repair_cost %}
 <p>
@@ -38,6 +40,8 @@ Confidence: {{ results[0].confidence }}%
 
 
 <!-- ================= POSSIBLE CAUSES ================= -->
+
+{% if results|length > 1 %}
 
 <div class="result-card">
 
@@ -79,6 +83,8 @@ Confidence: {{ results[0].confidence }}%
 {% endfor %}
 
 </div>
+
+{% endif %}
 
 
 <!-- ================= USER CHECK ================= -->
@@ -143,6 +149,19 @@ Submit Answers
 </div>
 
 {% endif %}
+
+{% else %}
+
+<div class="result-card">
+
+<h3>No Diagnosis Found</h3>
+
+<p>
+Motronix AI could not identify the issue clearly.  
+Please describe the problem in more detail.
+</p>
+
+</div>
 
 {% endif %}
 

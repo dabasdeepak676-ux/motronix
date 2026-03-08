@@ -1,0 +1,114 @@
+/* ================= PROFILE PAGE ================= */
+
+.profile-wrapper{
+max-width:900px;
+margin:auto;
+padding:60px 20px;
+}
+
+.profile-header{
+text-align:center;
+margin-bottom:40px;
+}
+
+.profile-avatar{
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #ff3b3b;
+box-shadow:0 0 30px rgba(255,0,0,0.5);
+margin-bottom:15px;
+}
+
+.profile-name{
+font-size:26px;
+font-weight:600;
+}
+
+.profile-role{
+color:#aaa;
+font-size:14px;
+}
+
+/* STATS */
+
+.profile-stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:18px;
+margin:30px 0;
+}
+
+.stat-card{
+background:rgba(255,0,0,0.08);
+padding:20px;
+border-radius:12px;
+border:1px solid rgba(255,0,0,0.2);
+text-align:center;
+transition:0.3s;
+}
+
+.stat-card:hover{
+transform:translateY(-5px);
+box-shadow:0 0 20px rgba(255,0,0,0.4);
+}
+
+.stat-number{
+font-size:24px;
+font-weight:700;
+margin-top:5px;
+}
+
+/* PROFILE FORM */
+
+.profile-card{
+background:rgba(20,20,20,0.9);
+padding:40px;
+border-radius:16px;
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.profile-card h2{
+margin-bottom:20px;
+}
+
+.profile-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:18px;
+margin-bottom:20px;
+}
+
+.profile-input{
+width:100%;
+padding:12px;
+background:#111;
+border:1px solid #333;
+border-radius:8px;
+color:white;
+}
+
+.save-btn{
+margin-top:20px;
+background:#ff3b3b;
+border:none;
+padding:12px 30px;
+border-radius:8px;
+color:white;
+font-weight:600;
+cursor:pointer;
+}
+
+.save-btn:hover{
+background:#ff1c1c;
+}
+
+/* BUTTONS */
+
+.profile-actions{
+margin-top:30px;
+display:flex;
+gap:20px;
+justify-content:center;
+}

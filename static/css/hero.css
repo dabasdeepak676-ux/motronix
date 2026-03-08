@@ -1,0 +1,395 @@
+/* ================= PREMIUM HOME ================= */
+
+.premium-hero{
+padding:10px 20px;
+text-align:center;
+min-height:auto;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:6px;
+position:relative;
+overflow:hidden;
+}
+
+.glow-text{
+font-size:64px;
+font-weight:700;
+color:white;
+text-shadow:0 0 25px rgba(255,0,0,0.9);
+animation: cinematicGlow 3s ease-in-out infinite;
+margin-bottom:6px;
+}
+
+.tagline{
+font-size:18px;
+color:#bbb;
+margin-top:4px;
+margin-bottom:6px;
+}
+
+/* ================= HERO GLOW ================= */
+
+.premium-hero::before{
+content:"";
+position:absolute;
+top:-50%;
+left:-50%;
+width:200%;
+height:200%;
+background:radial-gradient(circle,rgba(255,0,0,0.15) 0%,transparent 60%);
+animation:slowRotate 20s linear infinite;
+z-index:0;
+}
+
+@keyframes slowRotate{
+from{transform:rotate(0deg);}
+to{transform:rotate(360deg);}
+}
+
+@keyframes cinematicGlow{
+0%{text-shadow:0 0 10px red,0 0 20px red;}
+50%{text-shadow:0 0 25px red,0 0 50px darkred;}
+100%{text-shadow:0 0 10px red,0 0 20px red;}
+}
+
+/* ================= CTA ================= */
+
+.cta-group{
+margin-top:30px;
+display:flex;
+justify-content:center;
+gap:20px;
+}
+
+.premium-btn{
+background:red;
+padding:14px 35px;
+border-radius:6px;
+text-decoration:none;
+color:white;
+font-weight:bold;
+transition:0.3s;
+}
+
+.premium-btn:hover{
+background:darkred;
+transform:scale(1.05);
+}
+
+.outline-btn{
+border:1px solid red;
+padding:14px 35px;
+border-radius:6px;
+text-decoration:none;
+color:red;
+transition:0.3s;
+}
+
+.outline-btn:hover{
+background:red;
+color:white;
+}
+
+/* ================= HERO MAIN LAYOUT ================= */
+
+.hero-main{
+display:grid;
+grid-template-columns:520px 1fr;
+align-items:center;
+justify-content:center;
+max-width:1200px;
+margin:auto;
+padding:10px 20px;
+gap:70px;
+position:relative;
+z-index:1;
+min-height:60vh;
+}
+
+/* ================= HERO LEFT ================= */
+
+.hero-left{
+display:flex;
+flex-direction:column;
+gap:24px;
+max-width:520px;
+z-index:2;
+}
+
+/* ================= DIAGNOSE CARD ================= */
+
+.diagnose-card{
+background:rgba(255,0,0,0.08);
+border:1px solid rgba(255,0,0,0.25);
+padding:30px;
+border-radius:18px;
+max-width:420px;
+box-shadow:0 0 40px rgba(255,0,0,0.15);
+}
+
+/* ================= HERO RIGHT ================= */
+
+.hero-right{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:60px;
+}
+
+/* ================= MECHANIC IMAGE ================= */
+
+.hero-mechanic{
+max-height:720px;
+object-fit:contain;
+filter:drop-shadow(0 0 120px rgba(255,0,0,0.35));
+pointer-events:none;
+animation:mechanicFloat 4s ease-in-out infinite;
+}
+
+.mechanic-img{
+max-width:420px;
+height:auto;
+object-fit:contain;
+}
+
+@keyframes mechanicFloat{
+0%{transform:translateY(0px);}
+50%{transform:translateY(-12px);}
+100%{transform:translateY(0px);}
+}
+
+/* ================= FEATURE COLUMN ================= */
+
+.hero-features{
+display:flex;
+flex-direction:column;
+gap:30px;
+width:300px;
+}
+
+/* ================= FEATURE CARD ================= */
+
+.feature-item{
+background:rgba(255,0,0,0.10);
+padding:22px 26px;
+border-radius:16px;
+border:1px solid rgba(255,0,0,0.25);
+backdrop-filter:blur(8px);
+transition:all 0.3s ease;
+box-shadow:0 0 30px rgba(255,0,0,0.15);
+}
+
+.feature-item h3{
+margin-bottom:6px;
+font-size:20px;
+font-weight:600;
+color:white;
+}
+
+.feature-item p{
+font-size:14px;
+color:#bbb;
+line-height:1.5;
+}
+
+.feature-item:hover{
+transform:translateX(-6px) scale(1.02);
+border-color:#ff3b3b;
+box-shadow:0 0 30px rgba(255,0,0,0.45);
+}
+
+/* ================= FEATURES SECTION ================= */
+
+.premium-section{
+display:flex;
+justify-content:center;
+gap:50px;
+max-width:1000px;
+margin:40px auto;
+text-align:center;
+flex-wrap:wrap;
+}
+
+.feature-box{
+width:240px;
+max-width:260px;
+padding:20px;
+}
+
+.feature-box:hover{
+transform:translateY(-10px);
+border-color:red;
+}
+
+/* ================= COMMUNITY CENTER ================= */
+
+.community-center{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+}
+
+/* ================= AI BADGE ================= */
+
+.ai-promo-badge{
+margin-top:35px;
+background:linear-gradient(90deg,#ff3c3c,#b30000);
+padding:14px 32px;
+border-radius:40px;
+display:inline-block;
+font-weight:600;
+max-width:420px;
+text-align:center;
+box-shadow:0 0 25px rgba(255,0,0,0.6);
+}
+
+/* ================= FOUNDER ================= */
+
+.founder-highlight{
+text-align:center;
+margin:60px 0;
+}
+
+/* ================= AUTH ================= */
+
+.auth-wrapper{
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:auto;
+}
+
+.auth-card{
+width:100%;
+max-width:420px;
+background:#111;
+padding:40px;
+border-radius:14px;
+border:1px solid #222;
+box-shadow:0 0 40px rgba(255,0,0,0.1);
+}
+
+.input-group{
+margin-bottom:18px;
+}
+
+.input-group input{
+width:100%;
+padding:14px;
+background:#1a1a1a;
+border:1px solid #333;
+color:white;
+border-radius:8px;
+font-size:14px;
+}
+
+.input-group input:focus{
+border-color:#ff3b3b;
+outline:none;
+}
+
+.auth-btn{
+width:100%;
+padding:14px;
+background:#ff3b3b;
+border:none;
+color:white;
+font-weight:600;
+border-radius:8px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.auth-btn:hover{
+background:#ff1f1f;
+}
+
+/* ================= SPEED16 BRAND ================= */
+
+.speed16-brand{
+text-align:center;
+margin-top:10px;
+margin-bottom:15px;
+font-size:18px;
+font-weight:600;
+color:#ff3b3b;
+letter-spacing:1px;
+}
+
+.speed16-brand span{
+color:white;
+font-weight:700;
+}
+
+/* ================= FOOTER ================= */
+
+.site-footer{
+padding:10px;
+margin-top:0;
+}
+
+/* ================= SMOOTH SCROLL ================= */
+
+html{
+scroll-behavior:smooth;
+}
+
+/* ================= FADE ANIMATION ================= */
+
+.fade-section{
+opacity:0;
+transform:translateY(40px);
+transition:all 0.8s ease;
+}
+
+.fade-section.visible{
+opacity:1;
+transform:translateY(0);
+}
+/* ================= SPEED16 HERO BRAND ================= */
+
+.speed16-hero{
+position:absolute;
+left:48%;
+top:50%;
+transform:translate(-50%,-50%);
+text-align:left;
+max-width:260px;
+}
+
+.speed16-hero h2{
+font-size:28px;
+font-weight:700;
+line-height:1.2;
+margin-bottom:12px;
+}
+
+.speed16-hero .red{
+color:#ff3b3b;
+}
+
+.speed16-icons{
+display:flex;
+gap:14px;
+margin-bottom:12px;
+}
+
+.speed16-icons a{
+font-size:22px;
+color:white;
+transition:0.3s;
+}
+
+.speed16-icons a:hover{
+color:#ff3b3b;
+transform:scale(1.2);
+}
+
+.founder-line{
+font-size:14px;
+color:#aaa;
+line-height:1.5;
+}

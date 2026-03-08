@@ -1,101 +1,150 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Motronix - Automotive Intelligence Simplified</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<title>Motronix - Automotive Intelligence Simplified</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/community.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hero.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
+
 <body>
 
 <div class="mouse-light"></div>
 
 <!-- ================= NAVBAR ================= -->
+
 <nav class="navbar">
-    <div class="navbar-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
+
+<div class="navbar-logo">
+<img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
 </div>
-    </div>
-    {% if current_user.is_authenticated and current_user.email in ADMIN_EMAILS %}
+
+{% if current_user.is_authenticated and current_user.email in ADMIN_EMAILS %}
 <a href="/admin" class="nav-admin-btn">Admin</a>
 {% endif %}
-    <div class="nav-center">
-        <a href="/">Home</a>
-        <a href="/community">Community</a>
-        <a href="/news">News</a>
-        <a href="/videos">Videos</a>
-    </div>
 
-    <div class="nav-right">
-        {% if current_user.is_authenticated %}
-            <div class="nav-profile-wrapper">
-                <div class="nav-profile">
-                    <div class="profile-badge">
-                        {{ current_user.username[0] | upper }}
-                    </div>
-                    <span class="profile-name">
-                        <a href="/profile" class="nav-user">
-                          <div class="user-menu">
+<div class="nav-center">
+<a href="/">Home</a>
+<a href="/community">Community</a>
+<a href="/news">News</a>
+<a href="/videos">Videos</a>
+</div>
 
-<button class="user-button">
+<div class="nav-right">
+
+{% if current_user.is_authenticated %}
+
+<div class="nav-profile-wrapper">
+
+<div class="nav-profile">
+
+<div class="profile-badge">
+{{ current_user.username[0] | upper }}
+</div>
+
+<div class="profile-name" style="position:relative;">
+
+<button class="user-button" onclick="toggleUserMenu()">
 {{ current_user.username }}
+<i class="fa-solid fa-chevron-down"></i>
 </button>
 
-<div class="user-dropdown">
+<div class="user-dropdown" id="userMenu">
 
-<a href="/profile">Profile</a>
+<a href="/profile">
+<i class="fa-solid fa-user"></i> Profile
+</a>
 
-<a href="/contact">Contact</a>
+<a href="/contact">
+<i class="fa-solid fa-envelope"></i> Contact
+</a>
 
-<a href="/privacy">Privacy Policy</a>
+<div class="dropdown-divider"></div>
 
-<a href="/terms">Terms of Service</a>
+<a href="/privacy">
+<i class="fa-solid fa-shield-halved"></i> Privacy Policy
+</a>
 
-<a href="/disclaimer">Disclaimer</a>
+<a href="/terms">
+<i class="fa-solid fa-file-contract"></i> Terms of Service
+</a>
 
-<a href="/logout">Logout</a>
+<a href="/disclaimer">
+<i class="fa-solid fa-circle-exclamation"></i> Disclaimer
+</a>
+
+<div class="dropdown-divider"></div>
+
+<a href="/logout">
+<i class="fa-solid fa-right-from-bracket"></i> Logout
+</a>
+
+<link rel="stylesheet" href="/static/css/news.css">
+</div>
+
+</div>
 
 </div>
 
 </div>
-                          </a>
-                    </span>
-                </div>
-                <a href="/logout" class="nav-btn">Logout</a>
-            </div>
-        {% else %}
-            <a href="/login" class="nav-btn">Login</a>
-        {% endif %}
-    </div>
+
+{% else %}
+
+<a href="/login" class="nav-btn">Login</a>
+
+{% endif %}
+
+</div>
+
 </nav>
 
 <!-- ================= MAIN CONTENT ================= -->
+
 <div class="main-container">
-    {% block content %}{% endblock %}
+
+{% block content %}{% endblock %}
+
 </div>
 
 <!-- ================= FUTURISTIC BRAND STRIP ================= -->
 
 <section class="brand-strip">
-    <div class="brand-content">
 
-        <div class="brand-left">
-            <h3>Powered by Speed16</h3>
-        </div>
+<div class="brand-content">
 
-        <div class="brand-social">
-            <a href="https://youtube.com/@speed16R" target="_blank" class="social-icon youtube">
-                <i class="fab fa-youtube"></i>
-            </a>
-            <a href="https://instagram.com/channelspeed16" target="_blank" class="social-icon instagram">
-                <i class="fab fa-instagram"></i>
-            </a>
-        </div>
+<div class="brand-left">
+<h3>Powered by Speed16</h3>
+</div>
 
-        <p class="brand-founder">
-            Founded by Ritesh — Engineer & Automotive Influencer
-        </p>
+<div class="brand-social">
 
-    </div>
+<a href="https://youtube.com/@speed16R" target="_blank" class="social-icon youtube">
+<i class="fab fa-youtube"></i>
+</a>
+
+<a href="https://instagram.com/channelspeed16" target="_blank" class="social-icon instagram">
+<i class="fab fa-instagram"></i>
+</a>
+
+</div>
+
+<p class="brand-founder">
+Founded by Ritesh — Engineer & Automotive Influencer
+</p>
+
+</div>
+
 </section>
 
 <!-- ================= AI FLOATING BUTTON ================= -->
@@ -103,32 +152,39 @@
 {% if current_user.is_authenticated %}
 
 <div class="ai-orb" onclick="toggleAI()">
-    <span class="ai-text">AI</span>
+<span class="ai-text">AI</span>
 </div>
 
 <div class="ai-chatbox" id="aiBox">
-    <div class="ai-header">
-        Motronix AI
-        <span style="cursor:pointer;" onclick="toggleAI()">✖</span>
-    </div>
 
-    <div class="ai-messages" id="aiMessages">
-        <div class="ai-message">
-            Hi 👋 I’m your Motronix Car Assistant.
-            Ask anything about buying, service, engine, EV or scams.
-        </div>
-    </div>
+<div class="ai-header">
+Motronix AI
+<span style="cursor:pointer;" onclick="toggleAI()">✖</span>
+</div>
 
-    <div class="ai-input-area">
-        <input type="text" id="aiInput" placeholder="Ask something..." />
-        <button onclick="sendAI()">Send</button>
-    </div>
+<div class="ai-messages" id="aiMessages">
+
+<div class="ai-message">
+Hi 👋 I’m your Motronix Car Assistant.
+Ask anything about buying, service, engine, EV or scams.
+</div>
+
+</div>
+
+<div class="ai-input-area">
+
+<input type="text" id="aiInput" placeholder="Ask something..." />
+
+<button onclick="sendAI()">Send</button>
+
+</div>
+
 </div>
 
 {% else %}
 
 <div class="ai-orb disabled-ai" onclick="redirectToLogin()">
-    <span class="ai-text">AI</span>
+<span class="ai-text">AI</span>
 </div>
 
 {% endif %}
@@ -136,94 +192,54 @@
 <!-- ================= SCRIPTS ================= -->
 
 <script>
-function redirectToLogin() {
-    alert("Login to unlock Motronix AI 🚗");
-    window.location.href = "/login";
+
+function redirectToLogin(){
+
+alert("Login to unlock Motronix AI 🚗");
+
+window.location.href="/login";
+
 }
 
-const light = document.querySelector('.mouse-light');
-document.addEventListener('mousemove', (e) => {
-    light.style.left = e.clientX + 'px';
-    light.style.top = e.clientY + 'px';
+const light=document.querySelector('.mouse-light');
+
+document.addEventListener('mousemove',(e)=>{
+
+light.style.left=e.clientX+'px';
+light.style.top=e.clientY+'px';
+
 });
+
 </script>
 
 <script>
-function toggleAI() {
-    const box = document.getElementById("aiBox");
-    box.classList.toggle("show-ai");
+
+function toggleAI(){
+
+const box=document.getElementById("aiBox");
+
+box.classList.toggle("show-ai");
+
 }
 
-async function sendAI() {
-    const input = document.getElementById("aiInput");
-    const button = document.querySelector(".ai-input-area button");
-    const messages = document.getElementById("aiMessages");
-
-    if (!input || input.value.trim() === "") return;
-
-    button.disabled = true;
-    button.style.opacity = "0.6";
-
-    const userText = input.value;
-
-    const userMsg = document.createElement("div");
-    userMsg.className = "ai-user-message";
-    userMsg.innerText = userText;
-    messages.appendChild(userMsg);
-
-    input.value = "";
-
-    const botMsg = document.createElement("div");
-    botMsg.className = "ai-message";
-    botMsg.innerHTML = `
-        <div class="typing">
-            <span></span><span></span><span></span>
-        </div>
-    `;
-    messages.appendChild(botMsg);
-
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-        const response = await fetch("/ask-ai", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ message: userText })
-        });
-
-        const data = await response.json();
-
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        botMsg.innerText = data.reply;
-    } catch (error) {
-        botMsg.innerText = "AI temporarily unavailable.";
-    }
-
-    button.disabled = false;
-    button.style.opacity = "1";
-    messages.scrollTop = messages.scrollHeight;
-}
 </script>
 
+<!-- ================= USER DROPDOWN SCRIPT ================= -->
+
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const sections = document.querySelectorAll(".fade-section");
 
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("visible");
-            }
-        });
-    }, { threshold: 0.2 });
+function toggleUserMenu(){
 
-    sections.forEach(section => {
-        observer.observe(section);
-    });
-});
+const menu=document.getElementById("userMenu");
+
+if(menu.style.display==="block"){
+menu.style.display="none";
+}else{
+menu.style.display="block";
+}
+
+}
+
 </script>
 
 <footer class="site-footer">
@@ -247,6 +263,69 @@ document.addEventListener("DOMContentLoaded", function () {
 </div>
 
 </footer>
+<script>
 
+async function sendAI(){
+
+const input = document.getElementById("aiInput");
+const messages = document.getElementById("aiMessages");
+
+if(!input){
+console.log("Input box not found");
+return;
+}
+
+let userText = input.value.trim();
+
+if(userText === ""){
+return;
+}
+
+// USER MESSAGE
+
+let userMsg = document.createElement("div");
+userMsg.className = "ai-user-message";
+userMsg.innerText = userText;
+
+messages.appendChild(userMsg);
+
+input.value = "";
+
+// BOT MESSAGE
+
+let botMsg = document.createElement("div");
+botMsg.className = "ai-message";
+botMsg.innerText = "Thinking...";
+
+messages.appendChild(botMsg);
+
+messages.scrollTop = messages.scrollHeight;
+
+try{
+
+let response = await fetch("/ask-ai",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body: JSON.stringify({message:userText})
+});
+
+let data = await response.json();
+
+botMsg.innerText = data.reply;
+
+}catch(err){
+
+botMsg.innerText = "AI error. Try again.";
+
+}
+
+messages.scrollTop = messages.scrollHeight;
+
+}
+
+</script>
 </body>
+
 </html>

@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 from ai_engine.diagnostic_engine import diagnose_vehicle
+from failure_database import FAILURE_DATABASE
 from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,7 +9,13 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.utils import secure_filename
 from flask_wtf import CSRFProtect
 import os
+from PIL import Image
+
+
+from flask_wtf import CSRFProtect
+import os
 from collections import defaultdict
+from PIL import Image
 from google import genai
 import re
 from datetime import datetime, timedelta
@@ -108,9 +115,49 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 app = Flask(__name__)
+# ================= FILE SIZE LIMIT =================
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+
+# ================= ALLOWED IMAGE TYPES =================
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+def compress_image(image_path):
+
+    try:
+
+        img = Image.open(image_path)
+
+        img = img.convert("RGB")
+
+        img.save(
+            image_path,
+            format="JPEG",
+            quality=70,
+            optimize=True
+        )
+
+    except Exception as e:
+
+        print("Image compression error:", e)
+
+def safe_image_check(file_path):
+
+    try:
+        img = Image.open(file_path)
+        img.verify()
+
+        if img.format.lower() not in ["jpeg","png","webp"]:
+            return False
+
+        return True
+
+    except:
+        return False
 ADMIN_EMAILS = [
     "dabasdeepak676@gmail.com",
-    "riteshsingh1609@gmail.com"
+    "riteshsingh1609@gmail.com",
+    "channelspeed16@gmail.com",
+    "mechanicalbull@gmail.com"
 ]
 @app.context_processor
 def inject_admin_emails():
@@ -136,14 +183,13 @@ mail = Mail(app)
 
 database_url = os.environ.get("DATABASE_URL")
 
+# Render PostgreSQL compatibility fix
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "super-secret-dev-key-123"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///database.db"
-
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -170,6 +216,34 @@ google = oauth.register(
 
 UPLOAD_FOLDER = "static/news_images"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# POST IMAGE UPLOAD FOLDER
+
+POST_IMAGE_UPLOAD = "static/post_images"
+app.config["POST_IMAGE_UPLOAD"] = POST_IMAGE_UPLOAD
+
+# 10MB upload limit
+
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
+if not os.path.exists(POST_IMAGE_UPLOAD):
+    os.makedirs(POST_IMAGE_UPLOAD)
+
+
+# ================= POST IMAGE UPLOAD =================
+
+POST_IMAGE_UPLOAD = "static/post_images"
+app.config["POST_IMAGE_UPLOAD"] = POST_IMAGE_UPLOAD
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
+
+def allowed_file(filename):
+
+    return "." in filename and \
+    filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+if not os.path.exists(POST_IMAGE_UPLOAD):
+    os.makedirs(POST_IMAGE_UPLOAD)
 
 PROFILE_UPLOAD = "static/profile_images"
 app.config["PROFILE_UPLOAD"] = PROFILE_UPLOAD
@@ -232,6 +306,27 @@ def send_email(to, subject, body):
 
     except Exception as e:
         print("EMAIL ERROR:", e)
+        # ================= VIDEOS =================
+
+@app.route("/videos")
+def videos():
+
+    youtube_videos = [
+        "https://www.youtube.com/embed/VIDEO_ID_1",
+        "https://www.youtube.com/embed/VIDEO_ID_2",
+        "https://www.youtube.com/embed/VIDEO_ID_3"
+    ]
+
+    instagram_posts = [
+        "https://www.instagram.com/p/POST_ID_1/embed",
+        "https://www.instagram.com/p/POST_ID_2/embed"
+    ]
+
+    return render_template(
+        "videos.html",
+        youtube_videos=youtube_videos,
+        instagram_posts=instagram_posts
+    )
 
 # ================= AUTOHIVE KNOWLEDGE BASE =================
 
@@ -262,6 +357,7 @@ KNOWLEDGE_BASE = {
     }
 
 }
+
 
 # ================= MODELS =================
 
@@ -308,6 +404,8 @@ class Post(db.Model):
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
 
+    image = db.Column(db.String(200))
+
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
     author = db.relationship("User", backref="posts")
@@ -337,6 +435,19 @@ class News(db.Model):
     content = db.Column(db.Text, nullable=False)
     image = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+# ================= AI LEARNING MODEL =================
+
+class DiagnosticLearning(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    problem_text = db.Column(db.Text)
+
+    predicted_issue = db.Column(db.String(200))
+
+    confidence = db.Column(db.Integer)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ================= REPUTATION SYSTEM =================
 
@@ -578,12 +689,73 @@ def profile():
 @login_required
 def community():
 
-   posts = Post.query.order_by(Post.id.desc()).all()
+    posts = Post.query.order_by(Post.id.desc()).all()
 
-   for post in posts:
-       post.author = User.query.get(post.user_id)
+    return render_template(
+        "community.html",
+        posts=posts
+    )
 
-   return render_template("community.html", posts=posts)
+
+# ================= CREATE POST =================
+
+@app.route("/create-post", methods=["GET", "POST"])
+@login_required
+def create_post():
+
+    if request.method == "POST":
+
+        title = request.form.get("title")
+        content = request.form.get("content")
+
+        if not title or not content:
+            flash("Title and content required")
+            return redirect("/create-post")
+
+        image_file = request.files.get("image")
+        filename = None
+
+        if image_file and image_file.filename != "":
+
+            if allowed_file(image_file.filename):
+
+                filename = secure_filename(image_file.filename)
+
+                image_path = os.path.join(
+                    app.config["POST_IMAGE_UPLOAD"],
+                    filename
+                )
+
+                image_file.save(image_path)
+
+                # IMAGE COMPRESSION
+                compress_image(image_path)
+
+                # IMAGE VALIDATION
+                if not safe_image_check(image_path):
+
+                    os.remove(image_path)
+
+                    flash("Invalid image file")
+
+                    return redirect("/create-post")
+
+
+        post = Post(
+            title=title,
+            content=content,
+            image=filename,
+            user_id=current_user.id
+        )
+
+        db.session.add(post)
+        db.session.commit()
+
+        flash("Post created successfully")
+
+        return redirect("/community")
+
+    return render_template("create_post.html")
 # ================= ADD CAR =================
 
 @app.route("/add-car", methods=["GET", "POST"])
@@ -650,7 +822,19 @@ def diagnose():
 
         results, questions = diagnose_vehicle(problem, answers)
 
-        return render_template(
+# ================= STORE AI LEARNING =================
+
+    if results:
+
+            learning = DiagnosticLearning(
+                problem_text=problem,
+                predicted_issue=results[0]["issue"],
+                confidence=results[0]["confidence"]
+            )
+
+            db.session.add(learning)
+            db.session.commit()
+    return render_template(
     "diagnosis_result.html",
     car=car,
     results=results,
@@ -777,6 +961,53 @@ def upvote(post_id):
 
     return redirect("/community")
 
+# ================= SYMPTOM SUGGESTION =================
+
+@app.route("/symptom-suggest")
+def symptom_suggest():
+
+    query = request.args.get("q","").lower().strip()
+
+    if not query:
+        return jsonify({"suggestions":[]})
+
+    suggestions = []
+
+    for failure in FAILURE_DATABASE:
+
+        # problem match
+        problem = failure.get("problem","").lower()
+
+        if query in problem:
+            suggestions.append(problem)
+
+        # match individual words
+        for word in problem.split():
+
+            if query in word:
+                suggestions.append(problem)
+
+        # search symptoms
+        for symptom in failure.get("symptoms",[]):
+
+            s = symptom.lower()
+
+            if query in s:
+                suggestions.append(s)
+
+            for w in s.split():
+
+                if query in w:
+                    suggestions.append(s)
+
+    # remove duplicates
+    suggestions = list(set(suggestions))
+
+    # limit suggestions
+    suggestions = suggestions[:10]
+
+    return jsonify({"suggestions":suggestions})
+
 # ================= NEWS =================
 
 @app.route("/news")
@@ -795,16 +1026,19 @@ def news_detail(news_id):
 @login_required
 def create_news():
     if current_user.role != "admin":
-     return "Access Denied"
+        return "Access Denied"
 
     if request.method == "POST":
+
         image_file = request.files.get("image")
         filename = None
 
         if image_file and image_file.filename != "":
             filename = secure_filename(image_file.filename)
-            image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            
+
+            image_file.save(
+                os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            )
 
         news = News(
             title=request.form["title"],
@@ -814,12 +1048,56 @@ def create_news():
 
         db.session.add(news)
         db.session.commit()
+
         return redirect("/news")
 
     return render_template("create_news.html")
 
 from flask import jsonify
 import requests
+# ================= EDIT NEWS =================
+
+@app.route("/admin/news/edit/<int:news_id>", methods=["GET","POST"])
+@login_required
+def edit_news(news_id):
+
+    if current_user.role != "admin":
+        return "Access Denied"
+
+    news = News.query.get_or_404(news_id)
+
+    if request.method == "POST":
+
+        news.title = request.form["title"]
+        news.content = request.form["content"]
+
+        image_file = request.files.get("image")
+
+        if image_file and image_file.filename != "":
+            filename = secure_filename(image_file.filename)
+            image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            news.image = filename
+
+        db.session.commit()
+
+        return redirect("/news")
+
+    return render_template("edit_news.html", news=news)
+# ================= DELETE NEWS =================
+
+@app.route("/admin/news/delete/<int:news_id>")
+@login_required
+def delete_news(news_id):
+
+    if current_user.role != "admin":
+        return "Access Denied"
+
+    news = News.query.get_or_404(news_id)
+
+    db.session.delete(news)
+    db.session.commit()
+
+    return redirect("/news")
 # ================= LEGAL PAGES =================
 
 @app.route("/privacy")
@@ -1147,4 +1425,4 @@ with app.app_context():
 # ================= START SERVER =================
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(debug=True)

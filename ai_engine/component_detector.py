@@ -4,139 +4,81 @@ def detect_components(problem_text):
 
     text = problem_text.lower()
 
-    components = []
+    COMPONENT_KEYWORDS = {
 
-    brake_words = [
-        "brake",
-        "braking",
-        "pedal",
-        "disc",
-        "rotor",
-        "caliper",
-        "pad",
-        "abs",
-        "stopping"
-    ]
+        "brake":[
+            "brake","braking","pedal","disc","rotor","caliper",
+            "pad","abs","stopping"
+        ],
 
-    engine_words = [
-        "engine",
-        "misfire",
-        "power loss",
-        "stall",
-        "knocking",
-        "rpm",
-        "engine shaking"
-    ]
+        "engine":[
+            "engine","misfire","power loss","stall","knocking",
+            "rpm","engine shaking","engine vibration"
+        ],
 
-    electrical_words = [
-        "battery",
-        "starter",
-        "alternator",
-        "fuse",
-        "not starting",
-        "no start",
-        "relay",
-        "sensor"
-    ]
+        "electrical":[
+            "battery","starter","alternator","fuse",
+            "not starting","no start","relay","sensor"
+        ],
 
-    cooling_words = [
-        "overheat",
-        "overheating",
-        "coolant",
-        "radiator",
-        "temperature",
-        "fan",
-        "water pump"
-    ]
+        "cooling":[
+            "overheat","overheating","coolant","radiator",
+            "temperature","fan","water pump"
+        ],
 
-    steering_words = [
-        "steering",
-        "alignment",
-        "pulling",
-        "steering vibration",
-        "hard steering"
-    ]
+        "steering":[
+            "steering","alignment","pulling",
+            "steering vibration","hard steering"
+        ],
 
-    ac_words = [
-        "ac",
-        "cooling",
-        "compressor",
-        "air conditioning",
-        "blower",
-        "weak cooling"
-    ]
+        "ac":[
+            "ac","cooling","compressor",
+            "air conditioning","blower","weak cooling"
+        ],
 
-    fuel_words = [
-        "fuel",
-        "injector",
-        "fuel pump",
-        "fuel smell",
-        "fuel pressure"
-    ]
+        "fuel":[
+            "fuel","injector","fuel pump",
+            "fuel smell","fuel pressure"
+        ],
 
-    transmission_words = [
-        "gear",
-        "gearbox",
-        "shifting",
-        "gear slipping",
-        "clutch"
-    ]
+        "transmission":[
+            "gear","gearbox","shifting",
+            "gear slipping","clutch"
+        ],
 
-    suspension_words = [
-        "shock",
-        "suspension",
-        "bump",
-        "clunk",
-        "wheel bearing",
-        "cv joint"
-    ]
+        "suspension":[
+            "shock","suspension","bump",
+            "clunk","wheel bearing","cv joint"
+        ],
 
-    # brake
-    for word in brake_words:
-        if word in text:
-            components.append("brake")
+        "ev":[
+            "ev","battery pack","charging",
+            "range drop","electric motor"
+        ],
 
-    # engine
-    for word in engine_words:
-        if word in text:
-            components.append("engine")
+        "hybrid":[
+            "hybrid","regen braking","hybrid battery"
+        ],
 
-    # electrical
-    for word in electrical_words:
-        if word in text:
-            components.append("electrical")
+        "adas":[
+            "lane assist","adaptive cruise",
+            "collision warning","parking assist"
+        ],
 
-    # cooling
-    for word in cooling_words:
-        if word in text:
-            components.append("cooling")
+        "body":[
+            "door","window","sunroof",
+            "wiper","mirror","body noise"
+        ]
+    }
 
-    # steering
-    for word in steering_words:
-        if word in text:
-            components.append("steering")
+    detected = set()
 
-    # AC
-    for word in ac_words:
-        if word in text:
-            components.append("ac")
+    for component, keywords in COMPONENT_KEYWORDS.items():
 
-    # fuel
-    for word in fuel_words:
-        if word in text:
-            components.append("fuel")
+        for word in keywords:
 
-    # transmission
-    for word in transmission_words:
-        if word in text:
-            components.append("transmission")
+            if word in text:
+                detected.add(component)
+                break
 
-    # suspension
-    for word in suspension_words:
-        if word in text:
-            components.append("suspension")
-
-    # remove duplicates
-    components = list(set(components))
-
-    return components
+    return list(detected)

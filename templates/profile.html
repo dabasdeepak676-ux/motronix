@@ -2,59 +2,107 @@
 
 {% block content %}
 
-<div class="auth-wrapper">
-<div class="auth-container">
+<div class="profile-wrapper">
 
-<h2 class="auth-title">My Profile</h2>
+<!-- PROFILE HEADER -->
+
+<div class="profile-header">
+
+{% if current_user.profile_photo %}
+
+<img 
+src="{{ url_for('static', filename='profile_images/' + current_user.profile_photo) }}" 
+class="profile-avatar">
+
+{% else %}
+
+<img 
+src="{{ url_for('static', filename='images/default-user.png') }}" 
+class="profile-avatar">
+
+{% endif %}
+
+<h2 class="profile-name">{{ current_user.username }}</h2>
+
+<div class="profile-role">{{ current_user.badge }}</div>
+
+</div>
+
+
+<!-- STATS -->
 
 <div class="profile-stats">
 
-<div class="stat-box">
+<div class="stat-card">
 <span>Cars</span>
-<strong>{{ cars_count }}</strong>
+<div class="stat-number">{{ cars_count }}</div>
 </div>
 
-<div class="stat-box">
+<div class="stat-card">
 <span>Posts</span>
-<strong>{{ posts_count }}</strong>
+<div class="stat-number">{{ posts_count }}</div>
 </div>
 
-<div class="stat-box">
+<div class="stat-card">
 <span>AI Used Today</span>
-<strong>{{ ai_used }}</strong>
+<div class="stat-number">{{ ai_used }}</div>
 </div>
 
-</div>
-
-<div class="profile-info">
-
-<div class="profile-row">
-<span>Username</span>
-<strong>{{ current_user.username }}</strong>
-<span class="badge">{{ current_user.badge }}</span>
-</div>
-
-<div class="profile-row">
+<div class="stat-card">
 <span>Reputation</span>
-<strong>{{ current_user.reputation }}</strong>
+<div class="stat-number">{{ current_user.reputation }}</div>
 </div>
 
-<!-- PROFILE UPDATE FORM -->
+</div>
+
+
+<!-- PROFILE FORM -->
+
+<div class="profile-card">
+
+<h2>Personal Information</h2>
+
 <form action="/update-profile" method="POST" enctype="multipart/form-data">
+
+
+<!-- LOCATION -->
 
 <h3 class="profile-section">Location</h3>
 
-<input type="text" name="city" placeholder="City"
-value="{{ current_user.city or '' }}" class="profile-input">
+<div class="profile-grid">
 
-<input type="text" name="state" placeholder="State"
-value="{{ current_user.state or '' }}" class="profile-input">
+<input 
+type="text"
+name="city"
+placeholder="City"
+value="{{ current_user.city or '' }}"
+class="profile-input">
 
-<input type="text" name="country" placeholder="Country"
-value="{{ current_user.country or '' }}" class="profile-input">
+<input 
+type="text"
+name="state"
+placeholder="State"
+value="{{ current_user.state or '' }}"
+class="profile-input">
 
-<input type="text" name="pincode" placeholder="Pincode"
-value="{{ current_user.pincode or '' }}" class="profile-input">
+<input 
+type="text"
+name="country"
+placeholder="Country"
+value="{{ current_user.country or '' }}"
+class="profile-input">
+
+<input 
+type="text"
+name="pincode"
+placeholder="Pincode"
+value="{{ current_user.pincode or '' }}"
+class="profile-input">
+
+</div>
+
+
+<!-- MOBILE -->
 
 <h3 class="profile-section">Mobile</h3>
 
@@ -66,17 +114,13 @@ value="{{ current_user.mobile or '' }}"
 class="profile-input"
 />
 
+
+<!-- PROFILE PHOTO -->
+
 <h3 class="profile-section">Profile Photo</h3>
 
-{% if current_user.profile_photo %}
-
-<img 
-src="{{ url_for('static', filename='profile_images/' + current_user.profile_photo) }}" 
-class="profile-avatar">
-
-{% endif %}
-
 <input type="file" name="profile_photo" class="file-input">
+
 
 <br><br>
 
@@ -87,6 +131,9 @@ Save Profile
 </form>
 
 </div>
+
+
+<!-- ACTION BUTTONS -->
 
 <div class="profile-actions">
 
@@ -100,7 +147,7 @@ Add Car
 
 </div>
 
-</div>
+
 </div>
 
 {% endblock %}

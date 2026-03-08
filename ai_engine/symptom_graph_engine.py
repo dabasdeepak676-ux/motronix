@@ -1,50 +1,48 @@
-def expand_words(problem_text):
+SYMPTOM_GRAPH = {
 
-    text = problem_text.lower()
+    "misfire": {
+        "spark plug": 10,
+        "ignition coil": 9,
+        "fuel injector": 7
+    },
 
-    synonyms = {
+    "shaking": {
+        "spark plug": 8,
+        "ignition coil": 7,
+        "engine mount": 6
+    },
 
-        "noise": [
-            "sound",
-            "squeak",
-            "squeaking",
-            "grinding",
-            "rubbing"
-        ],
+    "vibration": {
+        "engine mount": 8,
+        "wheel balance": 6,
+        "brake disc": 5
+    },
 
-        "brake": [
-            "braking",
-            "pedal",
-            "disc",
-            "rotor"
-        ],
+    "power": {
+        "fuel injector": 8,
+        "turbocharger": 6,
+        "air filter": 5
+    },
 
-        "start": [
-            "starting",
-            "crank",
-            "cranking",
-            "ignition"
-        ],
-
-        "overheat": [
-            "temperature",
-            "hot",
-            "heating"
-        ],
-
-        "engine": [
-            "motor",
-            "power"
-        ]
-
+    "brake": {
+        "brake disc": 9,
+        "brake pad": 7
     }
 
-    expanded_words = text.split()
+}
 
-    for word in text.split():
+def graph_reasoning(problem_words):
 
-        if word in synonyms:
+    component_scores = {}
 
-            expanded_words.extend(synonyms[word])
+    for word in problem_words:
 
-    return expanded_words
+        if word in SYMPTOM_GRAPH:
+
+            components = SYMPTOM_GRAPH[word]
+
+            for comp, score in components.items():
+
+                component_scores[comp] = component_scores.get(comp,0) + score
+
+    return component_scores
