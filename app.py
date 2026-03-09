@@ -3,24 +3,26 @@ load_dotenv()
 from ai_engine.diagnostic_engine import diagnose_vehicle
 from failure_database import FAILURE_DATABASE
 from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from models.models import db, User, Post, Comment, Vote, News, DiagnosticLearning, Car
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
+from routes.auth_routes import auth_bp
 from flask_wtf import CSRFProtect
+from services.email_service import send_email
+from routes.community_routes import community_bp
+from routes.ai_routes import ai_bp
+from routes.admin_routes import admin_bp
 import os
 from PIL import Image
 
 
-from flask_wtf import CSRFProtect
-import os
 from collections import defaultdict
-from PIL import Image
 from google import genai
 import re
 from datetime import datetime, timedelta
 
-from ai_engine.diagnostic_engine import diagnose_vehicle
+
 from authlib.integrations.flask_client import OAuth
 
 import secrets
@@ -115,6 +117,10 @@ if not GEMINI_API_KEY:
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 app = Flask(__name__)
+app.register_blueprint(auth_bp)
+app.register_blueprint(community_bp)
+app.register_blueprint(ai_bp)
+app.register_blueprint(admin_bp)
 print("Motronix server booting...")
 
 # ================= FILE SIZE LIMIT =================
@@ -192,10 +198,8 @@ if database_url and database_url.startswith("postgres://"):
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "super-secret-dev-key-123"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///database.db"
-
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
+db.init_app(app)
 
 # 🔐 Production Security Settings
 if os.environ.get("ENV") == "production":
@@ -224,18 +228,11 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 POST_IMAGE_UPLOAD = "static/post_images"
 app.config["POST_IMAGE_UPLOAD"] = POST_IMAGE_UPLOAD
 
-# 10MB upload limit
 
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
 if not os.path.exists(POST_IMAGE_UPLOAD):
     os.makedirs(POST_IMAGE_UPLOAD)
 
-
-# ================= POST IMAGE UPLOAD =================
-
-POST_IMAGE_UPLOAD = "static/post_images"
-app.config["POST_IMAGE_UPLOAD"] = POST_IMAGE_UPLOAD
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
@@ -291,23 +288,6 @@ login_manager.login_view = "login"
 
 from email.header import Header
 
-def send_email(to, subject, body):
-    try:
-        print("SENDING EMAIL TO:", to)
-
-        msg = Message(
-            subject=subject,
-            recipients=[to],
-            body=body,
-            sender=("Motronix", os.environ.get("MAIL_FROM"))
-        )
-
-        mail.send(msg)
-
-        print("EMAIL SENT SUCCESSFULLY")
-
-    except Exception as e:
-        print("EMAIL ERROR:", e)
         # ================= VIDEOS =================
 
 @app.route("/videos")
@@ -360,97 +340,6 @@ KNOWLEDGE_BASE = {
 
 }
 
-
-# ================= MODELS =================
-
-class User(UserMixin, db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    mobile = db.Column(db.String(20))
-
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-
-    role = db.Column(db.String(20), default="user")
-
-    ai_uses_today = db.Column(db.Integer, default=0)
-    ai_last_reset = db.Column(db.DateTime)
-
-    email_verified = db.Column(db.Boolean, default=False)
-    is_banned = db.Column(db.Boolean, default=False)
-
-    reset_token = db.Column(db.String(200), nullable=True)
-    reset_token_expiry = db.Column(db.DateTime, nullable=True)
-
-    verification_token = db.Column(db.String(200), nullable=True)
-    verification_token_expiry = db.Column(db.DateTime, nullable=True)
-
-    profile_photo = db.Column(db.String(200))
-
-    city = db.Column(db.String(100))
-    state = db.Column(db.String(100))
-    country = db.Column(db.String(100))
-    pincode = db.Column(db.String(20))
-
-    
-    reputation = db.Column(db.Integer, default=0)
-    posts_count = db.Column(db.Integer, default=0)
-    helpful_answers = db.Column(db.Integer, default=0)
-    badge = db.Column(db.String(50), default="Member")
-
-class Post(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-
-    image = db.Column(db.String(200))
-
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-
-    author = db.relationship("User", backref="posts")
-    comments = db.relationship("Comment", backref="post", cascade="all, delete")
-    votes = db.relationship("Vote", backref="post", cascade="all, delete")
-
-
-class Vote(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
-
-
-class Comment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.Text, nullable=False)
-
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey("post.id"), nullable=False)
-
-    user = db.relationship("User", backref="comments")
-
-
-class News(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(200), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(200))
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-# ================= AI LEARNING MODEL =================
-
-class DiagnosticLearning(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    problem_text = db.Column(db.Text)
-
-    predicted_issue = db.Column(db.String(200))
-
-    confidence = db.Column(db.Integer)
-
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
 # ================= REPUTATION SYSTEM =================
 
 def update_user_reputation(user):
@@ -468,38 +357,6 @@ def update_user_reputation(user):
 
     else:
         user.badge = "Member"
-
-
-# ================= CAR MODEL =================
-
-class Car(db.Model):
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    owner_id = db.Column(
-        db.Integer,
-        db.ForeignKey("user.id"),
-        nullable=False
-    )
-
-    brand = db.Column(db.String(100))
-    model = db.Column(db.String(100))
-    year = db.Column(db.Integer)
-
-    fuel_type = db.Column(db.String(50))
-    mileage = db.Column(db.Integer)
-
-    is_default = db.Column(db.Boolean, default=False)
-
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
-
-    owner = db.relationship(
-        "User",
-        backref="cars"
-    )
 
 # ================= LOGIN =================
 
@@ -529,86 +386,8 @@ def home():
         cars=cars
     )
 
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-
-        username = request.form.get("username")
-        email = request.form.get("email")
-        password = request.form.get("password")
-
-        existing_username = User.query.filter_by(username=username).first()
-        if existing_username:
-            flash("Username already exists.")
-            return redirect(url_for("register"))
-
-        existing_email = User.query.filter_by(email=email).first()
-        if existing_email:
-            flash("Email already registered. Please login.")
-            return redirect(url_for("register"))
-
-        hashed_password = generate_password_hash(password)
-
-        token = secrets.token_urlsafe(32)
-        expiry = datetime.utcnow() + timedelta(minutes=30)
-
-        new_user = User(
-            username=username,
-            email=email,
-            password=hashed_password,
-            role="user",
-            email_verified=False,
-            verification_token=token,
-            verification_token_expiry=expiry
-        )
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        verification_link = url_for("verify_email", token=token, _external=True)
-
-        send_email(
-            to=email,
-            subject="Verify your Motronix account",
-            body=f"Click this link to verify your account:\n\n{verification_link}"
-        )
-
-        flash("Account created. Please verify your email.")
-        return redirect(url_for("login"))
-
-    return render_template("register.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-
-        user = User.query.filter(
-            (User.username == username) | (User.email == username)
-        ).first()
-
-        if user and check_password_hash(user.password, password):
-            # Auto admin assign
-            if user.email in ADMIN_EMAILS:
-             user.role = "admin"
-             db.session.commit()
-            if user.is_banned:
-              flash("Your account has been banned.")
-              return redirect(url_for("login"))
-
-            if not user.email_verified:
-                flash("Please verify your email before logging in.")
-                return redirect(url_for("login"))
-
-            login_user(user)
-            return redirect("/community")
-
-        else:
-            flash("Invalid credentials")
-
-    return render_template("auth.html")
 @app.route("/login/google")
 def google_login():
     redirect_uri = url_for("google_callback", _external=True)
@@ -660,12 +439,6 @@ def make_admin():
 
     return "No user found"
 
-@app.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("You have been logged out.")
-    return redirect("/")
 
 @app.route("/profile")
 @login_required
@@ -685,79 +458,8 @@ def profile():
     )
 
 
-# ================= COMMUNITY =================
-
-@app.route("/community")
-@login_required
-def community():
-
-    posts = Post.query.order_by(Post.id.desc()).all()
-
-    return render_template(
-        "community.html",
-        posts=posts
-    )
 
 
-# ================= CREATE POST =================
-
-@app.route("/create-post", methods=["GET", "POST"])
-@login_required
-def create_post():
-
-    if request.method == "POST":
-
-        title = request.form.get("title")
-        content = request.form.get("content")
-
-        if not title or not content:
-            flash("Title and content required")
-            return redirect("/create-post")
-
-        image_file = request.files.get("image")
-        filename = None
-
-        if image_file and image_file.filename != "":
-
-            if allowed_file(image_file.filename):
-
-                filename = secure_filename(image_file.filename)
-
-                image_path = os.path.join(
-                    app.config["POST_IMAGE_UPLOAD"],
-                    filename
-                )
-
-                image_file.save(image_path)
-
-                # IMAGE COMPRESSION
-                compress_image(image_path)
-
-                # IMAGE VALIDATION
-                if not safe_image_check(image_path):
-
-                    os.remove(image_path)
-
-                    flash("Invalid image file")
-
-                    return redirect("/create-post")
-
-
-        post = Post(
-            title=title,
-            content=content,
-            image=filename,
-            user_id=current_user.id
-        )
-
-        db.session.add(post)
-        db.session.commit()
-
-        flash("Post created successfully")
-
-        return redirect("/community")
-
-    return render_template("create_post.html")
 # ================= ADD CAR =================
 
 @app.route("/add-car", methods=["GET", "POST"])
@@ -870,98 +572,6 @@ def create():
 
     return render_template("create.html")
 
-
-# ================= POST DETAIL =================
-
-@app.route("/post/<int:post_id>")
-def post_detail(post_id):
-
-    post = Post.query.get_or_404(post_id)
-
-    return render_template("post_detail.html", post=post)
-
-
-# ================= EDIT POST =================
-
-@app.route("/post/<int:post_id>/edit", methods=["GET", "POST"])
-@login_required
-def edit_post(post_id):
-
-    post = Post.query.get_or_404(post_id)
-
-    if post.user_id != current_user.id and current_user.role != "admin":
-        return "Unauthorized"
-
-    if request.method == "POST":
-
-        post.title = request.form["title"]
-        post.content = request.form["content"]
-
-        db.session.commit()
-
-        return redirect(url_for("post_detail", post_id=post.id))
-
-    return render_template("edit.html", post=post)
-
-
-# ================= DELETE POST =================
-
-@app.route("/post/<int:post_id>/delete", methods=["POST"])
-@login_required
-def delete_post(post_id):
-
-    post = Post.query.get_or_404(post_id)
-
-    if post.user_id != current_user.id and current_user.role != "admin":
-        return "Unauthorized"
-
-    db.session.delete(post)
-    db.session.commit()
-
-    return redirect(url_for("community"))
-
-
-# ================= ADD COMMENT =================
-
-@app.route("/add_comment/<int:post_id>", methods=["POST"])
-@login_required
-def add_comment(post_id):
-
-    content = request.form.get("content")
-
-    if content:
-
-        new_comment = Comment(
-            content=content,
-            user_id=current_user.id,
-            post_id=post_id
-        )
-
-        db.session.add(new_comment)
-        db.session.commit()
-
-    return redirect(url_for("post_detail", post_id=post_id))
-
-
-# ================= UPVOTE =================
-
-@app.route("/upvote/<int:post_id>")
-@login_required
-def upvote(post_id):
-
-    existing_vote = Vote.query.filter_by(
-        user_id=current_user.id,
-        post_id=post_id
-    ).first()
-
-    if existing_vote:
-        db.session.delete(existing_vote)
-    else:
-        db.session.add(Vote(user_id=current_user.id, post_id=post_id))
-
-    db.session.commit()
-
-    return redirect("/community")
 
 # ================= SYMPTOM SUGGESTION =================
 
@@ -1137,10 +747,11 @@ def forgot_password():
             reset_link = url_for("reset_password", token=token, _external=True)
 
             send_email(
-                to=email,
-                subject="Reset your Motronix password",
-                body=f"Click this link to reset your password:\n\n{reset_link}"
-            )
+    mail,
+    email,
+    "Reset your Motronix password",
+    f"Click this link to reset your password:\n\n{reset_link}"
+)
 
             flash("Reset link sent to your email.")
         else:
@@ -1148,26 +759,6 @@ def forgot_password():
 
     return render_template("forgot_password.html")
 
-# ================= GEMINI DIAGNOSTIC AI =================
-
-@app.route("/ask-ai", methods=["POST"])
-@login_required
-def ask_ai():
-
-    print("ask_ai route hit")
-
-    data = request.get_json()
-    if not data:
-        return jsonify({
-            "reply": "Invalid request."
-        })
-
-    user_message = data.get("message")
-
-    if not user_message or not user_message.strip():
-        return jsonify({
-            "reply": "Tell me clearly what you’re experiencing — noise, vibration, warning light, mileage drop, startup issue, etc."
-        })
 
     # ================= DAILY RESET LOGIC =================
 
@@ -1287,7 +878,7 @@ def delete_comment(comment_id):
     db.session.delete(comment)
     db.session.commit()
 
-    return redirect(url_for("post_detail", post_id=post_id))
+    return redirect(url_for("community.post_detail", post_id=post_id))
 
 # ================= EMAIL VERIFICATION =================
 
@@ -1346,79 +937,6 @@ def list_models():
         output.append(m.name)
     return {"models": output}
 
-# ==============================
-# ADMIN DASHBOARD
-# ==============================
-
-@app.route("/admin")
-@login_required
-def admin_dashboard():
-
-    if current_user.role != "admin":
-        return "Access Denied", 403
-
-    users = User.query.all()
-    posts = Post.query.all()
-    news = News.query.all()
-    comments = Comment.query.all()
-
-    total_ai_usage = db.session.query(db.func.sum(User.ai_uses_today)).scalar() or 0
-
-    return render_template(
-        "admin.html",
-        users=users,
-        posts=posts,
-        news=news,
-        comments=comments,
-        total_ai_usage=total_ai_usage
-    )
-
-@app.route("/admin/ban-user/<int:user_id>")
-@login_required
-def ban_user(user_id):
-
-    if current_user.role != "admin":
-        return "Access Denied"
-
-    user = User.query.get_or_404(user_id)
-    user.is_banned = True
-
-    db.session.commit()
-
-    return redirect("/admin")
-
-
-# ================= UNBAN USER =================
-
-@app.route("/admin/unban-user/<int:user_id>")
-@login_required
-def unban_user(user_id):
-
-    if current_user.role != "admin":
-        return "Access Denied"
-
-    user = User.query.get_or_404(user_id)
-
-    user.is_banned = False
-    db.session.commit()
-
-    return redirect("/admin")
-
-# ================= REMOVE ADMIN =================
-
-@app.route("/admin/remove-admin/<int:user_id>")
-@login_required
-def remove_admin(user_id):
-
-    if current_user.role != "admin":
-        return "Access Denied"
-
-    user = User.query.get_or_404(user_id)
-
-    user.role = "user"
-    db.session.commit()
-
-    return redirect("/admin")
 
 # ================= DB INIT =================
 
@@ -1426,7 +944,7 @@ def remove_admin(user_id):
 
 if __name__ == "__main__":
 
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5050))
 
     print("Starting Motronix server on port:", port)
 

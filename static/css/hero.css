@@ -1,24 +1,27 @@
 /* ================= PREMIUM HOME ================= */
 
 .premium-hero{
-padding:10px 20px;
+padding:0 20px;
+margin-top:-40px;
 text-align:center;
-min-height:auto;
 display:flex;
 flex-direction:column;
-align-items:center;
-justify-content:center;
+align-items:flex-start;
+justify-content:flex-start;
 gap:6px;
 position:relative;
 overflow:hidden;
 }
 
+/* ================= HERO TITLE ================= */
+
 .glow-text{
 font-size:64px;
 font-weight:700;
 color:white;
+margin-top:-20px;
 text-shadow:0 0 25px rgba(255,0,0,0.9);
-animation: cinematicGlow 3s ease-in-out infinite;
+animation:cinematicGlow 3s ease-in-out infinite;
 margin-bottom:6px;
 }
 
@@ -34,10 +37,10 @@ margin-bottom:6px;
 .premium-hero::before{
 content:"";
 position:absolute;
-top:-50%;
-left:-50%;
-width:200%;
-height:200%;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background:radial-gradient(circle,rgba(255,0,0,0.15) 0%,transparent 60%);
 animation:slowRotate 20s linear infinite;
 z-index:0;
@@ -61,6 +64,7 @@ margin-top:30px;
 display:flex;
 justify-content:center;
 gap:20px;
+flex-wrap:wrap;
 }
 
 .premium-btn{
@@ -96,18 +100,16 @@ color:white;
 
 .hero-main{
 display:grid;
-grid-template-columns:520px 1fr;
+grid-template-columns:minmax(320px,520px) 1fr;
 align-items:center;
 justify-content:center;
 max-width:1200px;
-margin:auto;
-padding:10px 20px;
-gap:70px;
+margin:0 auto;
+padding:0 20px;
+gap:60px;
 position:relative;
 z-index:1;
-min-height:60vh;
 }
-
 /* ================= HERO LEFT ================= */
 
 .hero-left{
@@ -135,13 +137,14 @@ box-shadow:0 0 40px rgba(255,0,0,0.15);
 display:flex;
 align-items:center;
 justify-content:center;
-gap:60px;
+gap:40px;
+flex-wrap:wrap;
 }
 
 /* ================= MECHANIC IMAGE ================= */
 
 .hero-mechanic{
-max-height:720px;
+max-height:600px;
 object-fit:contain;
 filter:drop-shadow(0 0 120px rgba(255,0,0,0.35));
 pointer-events:none;
@@ -246,11 +249,47 @@ text-align:center;
 box-shadow:0 0 25px rgba(255,0,0,0.6);
 }
 
-/* ================= FOUNDER ================= */
+/* ================= SPEED16 HERO BRAND ================= */
 
-.founder-highlight{
-text-align:center;
-margin:60px 0;
+.speed16-hero{
+position:relative;
+text-align:left;
+max-width:260px;
+margin-top:20px;
+}
+
+.speed16-hero h2{
+font-size:28px;
+font-weight:700;
+line-height:1.2;
+margin-bottom:12px;
+}
+
+.speed16-hero .red{
+color:#ff3b3b;
+}
+
+.speed16-icons{
+display:flex;
+gap:14px;
+margin-bottom:12px;
+}
+
+.speed16-icons a{
+font-size:22px;
+color:white;
+transition:0.3s;
+}
+
+.speed16-icons a:hover{
+color:#ff3b3b;
+transform:scale(1.2);
+}
+
+.founder-line{
+font-size:14px;
+color:#aaa;
+line-height:1.5;
 }
 
 /* ================= AUTH ================= */
@@ -259,7 +298,6 @@ margin:60px 0;
 display:flex;
 justify-content:center;
 align-items:center;
-min-height:auto;
 }
 
 .auth-card{
@@ -307,23 +345,6 @@ transition:0.3s;
 background:#ff1f1f;
 }
 
-/* ================= SPEED16 BRAND ================= */
-
-.speed16-brand{
-text-align:center;
-margin-top:10px;
-margin-bottom:15px;
-font-size:18px;
-font-weight:600;
-color:#ff3b3b;
-letter-spacing:1px;
-}
-
-.speed16-brand span{
-color:white;
-font-weight:700;
-}
-
 /* ================= FOOTER ================= */
 
 .site-footer{
@@ -331,69 +352,38 @@ padding:10px;
 margin-top:0;
 }
 
-/* ================= SMOOTH SCROLL ================= */
+/* ================= TABLET ================= */
 
-html{
-scroll-behavior:smooth;
+@media (max-width:1024px){
+
+.hero-main{
+grid-template-columns:1fr;
+text-align:center;
 }
 
-/* ================= FADE ANIMATION ================= */
-
-.fade-section{
-opacity:0;
-transform:translateY(40px);
-transition:all 0.8s ease;
+.hero-left{
+align-items:center;
 }
 
-.fade-section.visible{
-opacity:1;
-transform:translateY(0);
+.hero-right{
+flex-direction:column;
 }
-/* ================= SPEED16 HERO BRAND ================= */
 
 .speed16-hero{
-position:absolute;
-left:48%;
-top:50%;
-transform:translate(-50%,-50%);
-text-align:left;
-max-width:260px;
+text-align:center;
 }
 
-.speed16-hero h2{
-font-size:28px;
-font-weight:700;
-line-height:1.2;
-margin-bottom:12px;
+.hero-features{
+max-width:420px;
 }
 
-.speed16-hero .red{
-color:#ff3b3b;
+.mechanic-img{
+max-width:300px;
 }
 
-.speed16-icons{
-display:flex;
-gap:14px;
-margin-bottom:12px;
 }
 
-.speed16-icons a{
-font-size:22px;
-color:white;
-transition:0.3s;
-}
-
-.speed16-icons a:hover{
-color:#ff3b3b;
-transform:scale(1.2);
-}
-
-.founder-line{
-font-size:14px;
-color:#aaa;
-line-height:1.5;
-}
-/* ================= MOBILE FIX ================= */
+/* ================= MOBILE ================= */
 
 @media (max-width:768px){
 
@@ -447,12 +437,11 @@ text-align:center;
 }
 
 .speed16-hero{
-position:relative;
-left:auto;
-top:auto;
-transform:none;
 text-align:center;
 margin-top:20px;
 }
 
+}
+.glow-text{
+margin-top:-10px;
 }

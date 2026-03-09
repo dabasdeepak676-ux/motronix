@@ -79,7 +79,7 @@ class="author-avatar">
 
 <h2 class="post-title">
 
-<a href="{{ url_for('post_detail', post_id=post.id) }}">
+<a href="{{ url_for('community.post_detail', post_id=post.id) }}">
 
 {{ post.title }}
 
@@ -105,8 +105,6 @@ class="post-image">
 {% endif %}
 
 <!-- ================= TOP REPLY ================= -->
-
-<!-- TOP REPLIES -->
 
 {% if post.comments|length > 0 %}
 
@@ -146,7 +144,7 @@ Top Reply
 
 <div class="post-actions">
 
-<a href="{{ url_for('upvote', post_id=post.id) }}"
+<a href="{{ url_for('community.upvote', post_id=post.id) }}"
 class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('user_id','equalto',current_user.id)|list|length > 0 %}voted{% endif %}">
 
 🔥 {{ post.votes|length }}
@@ -154,7 +152,7 @@ class="vote-btn {% if current_user.is_authenticated and post.votes|selectattr('u
 </a>
 
 
-<a href="{{ url_for('post_detail', post_id=post.id) }}"
+<a href="{{ url_for('community.post_detail', post_id=post.id) }}"
 class="reply-count">
 
 💬 {{ post.comments|length }} replies
