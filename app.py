@@ -284,7 +284,7 @@ conversation_memory = defaultdict(list)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
+login_manager.login_view = "auth.login"
 
 from email.header import Header
 
@@ -884,6 +884,7 @@ def delete_comment(comment_id):
 
 @app.route("/verify-email/<token>")
 def verify_email(token):
+
     user = User.query.filter_by(verification_token=token).first()
 
     if not user:
@@ -899,12 +900,14 @@ def verify_email(token):
     db.session.commit()
 
     flash("Email verified successfully. You can now login.")
-    return redirect(url_for("login"))
+
+    return redirect(url_for("auth.login"))
 
 # ================= RESET PASSWORD =================
 
 @app.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
+
     user = User.query.filter_by(reset_token=token).first()
 
     if not user:
@@ -914,16 +917,19 @@ def reset_password(token):
         return "Token expired."
 
     if request.method == "POST":
+
         new_password = request.form.get("password")
 
         user.password = generate_password_hash(new_password)
+
         user.reset_token = None
         user.reset_token_expiry = None
 
         db.session.commit()
 
         flash("Password reset successful. Please login.")
-        return redirect(url_for("login"))
+
+        return redirect(url_for("auth.login"))
 
     return render_template("reset_password.html")
 
