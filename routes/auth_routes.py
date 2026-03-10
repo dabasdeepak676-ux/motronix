@@ -1,13 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for
+from flask import Blueprint, render_template, request, redirect, flash, url_for, current_app
 from flask_login import login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from datetime import datetime, timedelta
 
 from models.models import db, User
+from services.email_service import send_email
 
 auth_bp = Blueprint("auth", __name__)
-
 
 ADMIN_EMAILS = [
 "dabasdeepak676@gmail.com",
@@ -16,6 +16,8 @@ ADMIN_EMAILS = [
 "mechanicalbull@gmail.com"
 ]
 
+
+# ================= REGISTER =================
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -54,12 +56,31 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        flash("Account created successfully.")
+        # ================= EMAIL VERIFICATION =================
+
+        verification_link = url_for(
+            "verify_email",
+            token=token,
+            _external=True
+        )
+
+        mail = current_app.extensions["mail"]
+
+        send_email(
+            mail,
+            email,
+            "Verify your Motronix account",
+            f"Click this link to verify your account:\n\n{verification_link}"
+        )
+
+        flash("Account created. Please verify your email.")
 
         return redirect(url_for("auth.login"))
 
     return render_template("register.html")
 
+
+# ================= LOGIN =================
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -97,6 +118,8 @@ def login():
     return render_template("auth.html")
 
 
+# ================= LOGOUT =================
+
 @auth_bp.route("/logout")
 def logout():
 
@@ -105,3 +128,25 @@ def logout():
     flash("You have been logged out.")
 
     return redirect("/")
+# ================= DELETE USER =================
+
+    @admin_bp.route("/admin/delete-user/<int:user_id>")
+    @login_required
+    def delete_user(user_id):
+
+     if current_user.role != "admin":
+        return "Access Denied"
+
+    user = User.query.get_or_404(user_id)
+
+    # admin खुद को delete ना कर सके
+    if user.id == current_user.id:
+        flash("You cannot delete yourself")
+        return redirect("/admin")
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("User deleted successfully")
+
+    return redirect("/admin")

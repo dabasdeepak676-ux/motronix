@@ -11,13 +11,17 @@
         <form method="POST" class="auth-form">
 
             <!-- Select Car -->
-            <select name="car_id" class="auth-input" required>
-                {% for car in cars %}
-                <option value="{{ car.id }}">
-                    {{ car.brand }} {{ car.model }} ({{ car.year }})
-                </option>
-                {% endfor %}
-            </select>
+            <select name="car_id" required>
+
+<option value="">Select Your Car</option>
+<p>Selected Car: {{ car.brand }} {{ car.model }}</p>
+{% for car in cars %}
+<option value="{{ car.id }}">
+{{ car.brand }} {{ car.model }} ({{ car.year }})
+</option>
+{% endfor %}
+
+</select>
 
 
             <!-- Problem Description -->

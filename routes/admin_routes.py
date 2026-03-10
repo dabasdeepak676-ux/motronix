@@ -1,8 +1,6 @@
-from flask import Blueprint, render_template, redirect
+from flask import Blueprint, render_template, redirect, flash
 from flask_login import login_required, current_user
 from models.models import db, User, Post, Comment, News
-
-# ================= BLUEPRINT =================
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -18,8 +16,8 @@ def admin_dashboard():
 
     users = User.query.all()
     posts = Post.query.all()
-    news = News.query.all()
     comments = Comment.query.all()
+    news = News.query.all()
 
     total_ai_usage = db.session.query(db.func.sum(User.ai_uses_today)).scalar() or 0
 
@@ -27,10 +25,41 @@ def admin_dashboard():
         "admin.html",
         users=users,
         posts=posts,
-        news=news,
         comments=comments,
+        news=news,
         total_ai_usage=total_ai_usage
     )
+
+
+# ================= DELETE USER =================
+
+@admin_bp.route("/admin/delete-user/<int:user_id>")
+@login_required
+def delete_user(user_id):
+
+    if current_user.role != "admin":
+        return "Access Denied"
+
+    user = User.query.get_or_404(user_id)
+
+    # admin खुद को delete नहीं कर सकता
+    if user.id == current_user.id:
+        flash("You cannot delete yourself")
+        return redirect("/admin")
+
+    # पहले user के posts delete
+    Post.query.filter_by(user_id=user.id).delete()
+
+    # user के comments delete
+    Comment.query.filter_by(user_id=user.id).delete()
+
+    # अब user delete
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("User deleted successfully")
+
+    return redirect("/admin")
 
 
 # ================= BAN USER =================

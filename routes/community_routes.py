@@ -35,9 +35,20 @@ def create_post():
             flash("Title and content required")
             return redirect("/create-post")
 
+        image = request.files.get("image")
+        filename = None
+
+        if image and image.filename != "":
+            filename = secure_filename(image.filename)
+
+            upload_path = os.path.join("static/post_images", filename)
+
+            image.save(upload_path)
+
         post = Post(
             title=title,
             content=content,
+            image=filename,
             user_id=current_user.id
         )
 

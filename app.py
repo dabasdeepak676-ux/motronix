@@ -13,6 +13,7 @@ from services.email_service import send_email
 from routes.community_routes import community_bp
 from routes.ai_routes import ai_bp
 from routes.admin_routes import admin_bp
+
 import os
 from PIL import Image
 
@@ -121,6 +122,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(community_bp)
 app.register_blueprint(ai_bp)
 app.register_blueprint(admin_bp)
+
 print("Motronix server booting...")
 
 # ================= FILE SIZE LIMIT =================
@@ -188,14 +190,24 @@ mail = Mail(app)
 # ===============================
 # DATABASE CONFIG (LOCAL + PROD)
 # ===============================
+@app.route("/test-email")
+def test_email():
 
+    send_email(
+        mail,
+        "YOUR_EMAIL@gmail.com",
+        "Motronix Test Email",
+        "SMTP working!"
+    )
+
+    return "Email sent"
 database_url = os.environ.get("DATABASE_URL")
 
 # Render PostgreSQL compatibility fix
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY") or "super-secret-dev-key-123"
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url or "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -381,10 +393,10 @@ def home():
     ).first()
 
     return render_template(
-        "home.html",
-        default_car=default_car,
-        cars=cars
-    )
+    "home.html",
+    default_car=default_car,
+    cars=cars
+)
 
 
 
@@ -492,7 +504,29 @@ def add_car():
         return redirect("/garage")
 
     return render_template("add_car.html")
+# ================= SET DEFAULT CAR =================
 
+@app.route("/set-default-car/<int:car_id>")
+@login_required
+def set_default_car(car_id):
+
+    # remove old default
+    cars = Car.query.filter_by(owner_id=current_user.id).all()
+
+    for c in cars:
+        c.is_default = False
+
+    # set new default
+    car = Car.query.get_or_404(car_id)
+
+    if car.owner_id != current_user.id:
+        return "Unauthorized"
+
+    car.is_default = True
+
+    db.session.commit()
+
+    return redirect("/garage")
 
 # ================= GARAGE =================
 
@@ -507,28 +541,35 @@ def garage():
 
 # ================= AI DIAGNOSE =================
 
+# ================= AI DIAGNOSE =================
+
 @app.route("/diagnose", methods=["GET", "POST"])
 @login_required
 def diagnose():
 
-    car = Car.query.first()
+    cars = Car.query.filter_by(owner_id=current_user.id).all()
 
     if request.method == "POST":
 
         problem = request.form.get("problem")
+        car_id = request.form.get("car_id")
 
-        # collect answers from follow-up questions
+        # Get selected car
+        car = Car.query.get(car_id)
+
+        if not car:
+            flash("Please select a car.")
+            return redirect("/diagnose")
+
         answers = {}
 
         for key in request.form:
-            if key != "problem":
+            if key not in ["problem", "car_id"]:
                 answers[key] = request.form.get(key)
 
         results, questions = diagnose_vehicle(problem, answers)
 
-# ================= STORE AI LEARNING =================
-
-    if results:
+        if results:
 
             learning = DiagnosticLearning(
                 problem_text=problem,
@@ -538,15 +579,16 @@ def diagnose():
 
             db.session.add(learning)
             db.session.commit()
-    return render_template(
-    "diagnosis_result.html",
-    car=car,
-    results=results,
-    questions=questions,
-    problem=problem
-)
 
-    return render_template("diagnose.html", car=car)
+        return render_template(
+            "diagnosis_result.html",
+            results=results,
+            questions=questions,
+            problem=problem,
+            car=car
+        )
+
+    return render_template("diagnose.html", cars=cars)
 # ================= CREATE POST =================
 
 @app.route("/create", methods=["GET", "POST"])
@@ -665,7 +707,7 @@ def create_news():
 
     return render_template("create_news.html")
 
-from flask import jsonify
+
 import requests
 # ================= EDIT NEWS =================
 
@@ -945,12 +987,12 @@ def list_models():
 
 
 # ================= DB INIT =================
-
+ 
 # ================= START SERVER =================
 
 if __name__ == "__main__":
 
-    port = int(os.environ.get("PORT", 5050))
+    port = int(os.environ.get("PORT", 5001))
 
     print("Starting Motronix server on port:", port)
 

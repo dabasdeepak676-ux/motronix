@@ -64,7 +64,7 @@ Search
 <th>Username</th>
 <th>Email</th>
 <th>Role</th>
-<th>Action</th>
+<th>Actions</th>
 </tr>
 
 {% for user in users %}
@@ -80,15 +80,47 @@ Search
 
 {% if user.role == "admin" %}
 
-{% if user.id != current_user.id %} <a class="btn-danger" href="/admin/remove-admin/{{ user.id }}">Remove Admin</a>
-{% else %} <span class="badge">You</span>
-{% endif %}
+```
+{% if user.id != current_user.id %}
+
+    <a class="btn-danger" href="/admin/remove-admin/{{ user.id }}">
+    Remove Admin
+    </a>
 
 {% else %}
 
-{% if user.is_banned %} <a class="btn-success" href="/admin/unban-user/{{ user.id }}">Unban</a>
-{% else %} <a class="btn-danger" href="/admin/ban-user/{{ user.id }}">Ban</a>
+    <span class="badge">You</span>
+
 {% endif %}
+```
+
+{% else %}
+
+```
+{% if user.is_banned %}
+
+    <a class="btn-success" href="/admin/unban-user/{{ user.id }}">
+    Unban
+    </a>
+
+{% else %}
+
+    <a class="btn-danger" href="/admin/ban-user/{{ user.id }}">
+    Ban
+    </a>
+
+{% endif %}
+
+<!-- DELETE USER BUTTON -->
+
+<a
+class="btn-danger"
+href="/admin/delete-user/{{ user.id }}"
+onclick="return confirm('Delete this user permanently?')"
+>
+Delete
+</a>
+```
 
 {% endif %}
 
@@ -181,3 +213,4 @@ Delete
 </div>
 
 {% endblock %}
+

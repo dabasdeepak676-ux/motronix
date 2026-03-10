@@ -24,6 +24,22 @@ Year: {{ car.year }} |
 Fuel: {{ car.fuel_type }} |
 Mileage: {{ car.mileage }} km
 
+<br><br>
+
+{% if car.is_default %}
+
+<span style="color:#4CAF50;font-weight:bold">
+Default Car
+</span>
+
+{% else %}
+
+<a href="/set-default-car/{{ car.id }}" class="auth-button">
+Set Default
+</a>
+
+{% endif %}
+
 </li>
 
 {% endfor %}
@@ -32,8 +48,8 @@ Mileage: {{ car.mileage }} km
 
 <br>
 
-<a href="/diagnose" class="auth-button">
-AI Diagnose
+<a href="/add-car" class="auth-button">
+Add Another Car
 </a>
 
 {% else %}
