@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, flash
 from flask_login import login_required, current_user
-from models.models import db, User, Post, Comment, News
+from models.models import db, User, Post, Comment, News, WebsiteVisit
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -11,6 +11,7 @@ admin_bp = Blueprint("admin", __name__)
 @login_required
 def admin_dashboard():
 
+     
     if current_user.role != "admin":
         return "Access Denied", 403
 
@@ -20,15 +21,16 @@ def admin_dashboard():
     news = News.query.all()
 
     total_ai_usage = db.session.query(db.func.sum(User.ai_uses_today)).scalar() or 0
-
+    visit_count = WebsiteVisit.query.count()
     return render_template(
-        "admin.html",
-        users=users,
-        posts=posts,
-        comments=comments,
-        news=news,
-        total_ai_usage=total_ai_usage
-    )
+    "admin.html",
+    users=users,
+    posts=posts,
+    comments=comments,
+    news=news,
+    total_ai_usage=total_ai_usage,
+    visit_count=visit_count
+)
 
 
 # ================= DELETE USER =================

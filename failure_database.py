@@ -202,6 +202,8 @@ FAILURE_DATABASE = [
 "probability":5,
 "symptoms":[
 "engine overheating",
+"overheating",
+"engine temperature high",
 "coolant warning light"
 ],
 "user_checks":[
@@ -211,20 +213,36 @@ FAILURE_DATABASE = [
 },
 
 {
+
 "id":12,
 "problem":"Radiator Fan Failure",
 "system":"cooling",
-"component":"cooling fan",
+"component":"radiator fan",
 "severity":"high",
-"urgency":"service_soon",
-"probability":4,
+"urgency":"repair_immediately",
+"probability":7,
+
 "symptoms":[
-"engine overheating in traffic"
+"engine overheating",
+"temperature high",
+"fan not running"
 ],
+
+"possible_causes":[
+"fan motor failure",
+"fan relay fault",
+"wiring issue"
+],
+
+"estimated_cost":{
+"min":2500,
+"max":8000
+},
+
 "user_checks":[
-"check radiator fan operation"
-],
-"repair_cost":{"min":2500,"max":8000}
+"check if radiator fan turns on when engine is hot",
+"listen for fan noise near radiator"
+]
 },
 
 {
@@ -425,13 +443,17 @@ FAILURE_DATABASE = [
 {
 "id":24,
 "problem":"Wheel Alignment Incorrect",
-"system":"suspension",
+"system":"steering",
 "component":"wheel alignment",
 "severity":"low",
 "urgency":"service_soon",
-"probability":5,
+"probability":7,
 "symptoms":[
-"car pulling to one side"
+"car pulling to one side",
+"vehicle pulling left",
+"vehicle pulling right",
+"steering off center",
+"uneven tire wear"
 ],
 "user_checks":[
 "observe straight road behavior"
@@ -564,6 +586,8 @@ FAILURE_DATABASE = [
 "symptoms":[
 "engine revs high but speed not increasing",
 "burning smell from clutch"
+"gear not shifting properly",
+"hard gear shift"
 ],
 "user_checks":[
 "observe RPM increase without speed increase"
@@ -598,8 +622,10 @@ FAILURE_DATABASE = [
 "urgency":"service_soon",
 "probability":4,
 "symptoms":[
-"gear shifting hard",
+"gear hard to shift",
 "gearbox noise"
+"gear not shifting properly",
+"hard gear shift"
 ],
 "user_checks":[
 "check gearbox oil level"
@@ -616,8 +642,10 @@ FAILURE_DATABASE = [
 "urgency":"service_soon",
 "probability":3,
 "symptoms":[
-"gear grinding while shifting",
-"difficulty shifting gears"
+"gear hard to shift",
+"gearbox noise"
+"gear not shifting properly",
+"hard gear shift"
 ],
 "user_checks":[
 "check if grinding occurs while shifting"
@@ -979,8 +1007,10 @@ FAILURE_DATABASE = [
 "urgency":"service_soon",
 "probability":4,
 "symptoms":[
-"clunk noise while turning",
-"loose steering feel"
+"car pulling to one side",
+"steering loose",
+"steering vibration",
+"uneven tire wear"
 ],
 "user_checks":[
 "inspect steering play"
@@ -1267,9 +1297,12 @@ FAILURE_DATABASE = [
 "component":"wheel balancing",
 "severity":"low",
 "urgency":"service_soon",
-"probability":5,
+"probability":7,
 "symptoms":[
-"steering vibration at high speed"
+"car shaking while driving",
+"vibration while driving",
+"steering vibration",
+"wheel vibration"
 ],
 "user_checks":[
 "observe vibration around 80-100 km/h"
@@ -1445,9 +1478,11 @@ FAILURE_DATABASE = [
 "severity":"low",
 "urgency":"service_soon",
 "probability":5,
-"symptoms":[
-"remote not unlocking car",
-"remote range reduced"
+"symptoms": [
+"car not starting",
+"no start",
+"dashboard lights dim",
+"clicking sound while starting"
 ],
 "user_checks":[
 "replace key fob battery"
@@ -1834,11 +1869,14 @@ FAILURE_DATABASE = [
 {
 "id":102,
 "problem":"Turbocharger Failure",
+"vehicle_type":[
+"turbo"
+],
 "system":"engine",
 "component":"turbocharger",
 "severity":"high",
 "urgency":"service_soon",
-"probability":3,
+"probability":2,
 "symptoms":[
 "loss of engine power",
 "whistling noise from engine",

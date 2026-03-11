@@ -9,9 +9,10 @@ from ai_engine.diagnostic_question_engine import generate_questions
 # FILTER FAILURES
 # ---------------------------------------
 
-def filter_failures(problem_text):
+def filter_failures(problem_text, car=None):
 
     components = detect_components(problem_text)
+    print("Detected Components:", components)
 
     if not components:
         return FAILURE_DATABASE
@@ -36,7 +37,13 @@ def filter_failures(problem_text):
 
         for comp in components:
 
-            if comp in component or comp in system or comp in text:
+            # strict system match
+            if comp == system:
+                filtered.append(failure)
+                break
+
+            # secondary component match
+            if comp in component:
                 filtered.append(failure)
                 break
 
@@ -50,25 +57,28 @@ def filter_failures(problem_text):
 # MAIN DIAGNOSIS FUNCTION
 # ---------------------------------------
 
-def diagnose_vehicle(problem_text, answers=None):
+def diagnose_vehicle(problem_text, answers=None, car=None):
 
     if answers is None:
         answers = {}
 
     problem_text = problem_text.strip().lower()
 
-    # Step 1 → Filter relevant failures
-    filtered_db = filter_failures(problem_text)
+    # Step 1 → Detect components
+    components = detect_components(problem_text)
 
-    # Step 2 → Rank failures
+    # Step 2 → Filter failures
+    filtered_db = filter_failures(problem_text, car)
+
+    # Step 3 → Rank failures
     results = rank_failures(problem_text, filtered_db)
 
-    # Step 3 → Adjust confidence using evidence
+    # Step 4 → Adjust confidence
     results = adjust_scores(results, answers)
 
     questions = []
 
-    # Step 4 → Generate diagnostic questions
+    # Step 5 → Generate follow-up questions
     if results:
 
         top_issue = results[0]["issue"]

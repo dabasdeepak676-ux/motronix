@@ -128,25 +128,3 @@ def logout():
     flash("You have been logged out.")
 
     return redirect("/")
-# ================= DELETE USER =================
-
-    @admin_bp.route("/admin/delete-user/<int:user_id>")
-    @login_required
-    def delete_user(user_id):
-
-     if current_user.role != "admin":
-        return "Access Denied"
-
-    user = User.query.get_or_404(user_id)
-
-    # admin खुद को delete ना कर सके
-    if user.id == current_user.id:
-        flash("You cannot delete yourself")
-        return redirect("/admin")
-
-    db.session.delete(user)
-    db.session.commit()
-
-    flash("User deleted successfully")
-
-    return redirect("/admin")

@@ -29,6 +29,8 @@ def rank_failures(problem_text, failure_database):
     detected_component = detect_component(problem_text)
     components = detect_components(problem_text)
 
+    text = problem_text.lower()
+
     # ------------------------------------------------
     # PROBABILITY BASED SCORING
     # ------------------------------------------------
@@ -38,37 +40,55 @@ def rank_failures(problem_text, failure_database):
     for failure, base_score in scored_failures:
 
         score = base_score
+
         component = failure.get("component", "").lower()
+        system = failure.get("system", "").lower()
+
+        # ------------------------------------
+        # VEHICLE TYPE SAFETY FILTER
+        # ------------------------------------
+
+        if "ev" in system and "ev" not in text:
+            continue
+
+        if "hybrid" in system and "hybrid" not in text:
+            continue
 
         # ------------------------------------
         # STARTING SYSTEM PRIORITY
         # ------------------------------------
 
-        if "battery" in component:
-            score += 35
+        if "not starting" in text or "no start" in text:
 
-        if "starter motor" in component:
-            score += 20
+            if "battery" in component:
+                score += 35
 
-        if "starter relay" in component:
-            score += 5
+            if "starter motor" in component:
+                score += 20
+
+            if "starter relay" in component:
+                score += 10
 
         # ------------------------------------
         # IGNITION SYSTEM PRIORITY
         # ------------------------------------
 
-        if "spark plug" in component:
-            score += 12
+        if "misfire" in text or "engine shaking" in text or "rough idle" in text:
 
-        if "ignition coil" in component:
-            score += 8
+            if "spark plug" in component:
+                score += 12
+
+            if "ignition coil" in component:
+                score += 8
 
         # ------------------------------------
         # BRAKE DISC PRIORITY
         # ------------------------------------
 
-        if "brake disc" in component:
-            score += 18
+        if "brake" in text and "vibration" in text:
+
+            if "brake disc" in component:
+                score += 18
 
         # ------------------------------------
         # SYMPTOM WEIGHT BOOST
@@ -89,7 +109,7 @@ def rank_failures(problem_text, failure_database):
         # ------------------------------------
 
         if detected_system:
-            if failure.get("system", "").lower() == detected_system:
+            if system == detected_system:
                 score += 15
 
         # ------------------------------------
@@ -104,9 +124,11 @@ def rank_failures(problem_text, failure_database):
         # ------------------------------------
 
         for comp in components:
+
             if comp and comp in component:
                 score += 10
 
+        # ignore very low score
         if score <= 5:
             continue
 

@@ -120,3 +120,16 @@ class Car(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     owner = db.relationship("User", backref="cars")
+
+  # ================= WEBSITE VISITS =================
+
+class WebsiteVisit(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    visit_time = db.Column(
+        db.DateTime,
+        default=db.func.current_timestamp()
+    )
+
+    ip_address = db.Column(db.String(50))

@@ -3,7 +3,7 @@ load_dotenv()
 from ai_engine.diagnostic_engine import diagnose_vehicle
 from failure_database import FAILURE_DATABASE
 from flask import Flask, render_template, request, redirect, flash, url_for, jsonify
-from models.models import db, User, Post, Comment, Vote, News, DiagnosticLearning, Car
+from models.models import db, User, Post, Comment, Vote, News, DiagnosticLearning, Car, WebsiteVisit
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
@@ -13,6 +13,7 @@ from services.email_service import send_email
 from routes.community_routes import community_bp
 from routes.ai_routes import ai_bp
 from routes.admin_routes import admin_bp
+from flask import session
 
 import os
 from PIL import Image
@@ -382,21 +383,27 @@ def load_user(user_id):
 # ================= ROUTES =================
 
 @app.route("/")
-@login_required
 def home():
 
-    cars = Car.query.filter_by(owner_id=current_user.id).all()
+    if current_user.is_authenticated:
 
-    default_car = Car.query.filter_by(
-        owner_id=current_user.id,
-        is_default=True
-    ).first()
+        cars = Car.query.filter_by(owner_id=current_user.id).all()
+
+        default_car = Car.query.filter_by(
+            owner_id=current_user.id,
+            is_default=True
+        ).first()
+
+    else:
+
+        cars = []
+        default_car = None
 
     return render_template(
-    "home.html",
-    default_car=default_car,
-    cars=cars
-)
+        "home.html",
+        default_car=default_car,
+        cars=cars
+    )
 
 
 
@@ -469,7 +476,26 @@ def profile():
         ai_used=ai_used
     )
 
+# ================= WEBSITE VISIT TRACKER =================
 
+@app.before_request
+def track_visit():
+
+    try:
+
+        # ignore static files
+        if request.path.startswith("/static"):
+            return
+
+        visit = WebsiteVisit(
+            ip_address=request.remote_addr
+        )
+
+        db.session.add(visit)
+        db.session.commit()
+
+    except Exception as e:
+        pass
 
 
 # ================= ADD CAR =================
@@ -511,7 +537,10 @@ def add_car():
 def set_default_car(car_id):
 
     # remove old default
-    cars = Car.query.filter_by(owner_id=current_user.id).all()
+    if current_user.is_authenticated:
+     cars = Car.query.filter_by(owner_id=current_user.id).all()
+    else:
+     cars = []
 
     for c in cars:
         c.is_default = False
@@ -544,8 +573,25 @@ def garage():
 # ================= AI DIAGNOSE =================
 
 @app.route("/diagnose", methods=["GET", "POST"])
-@login_required
 def diagnose():
+
+    # ================= GUEST LIMIT =================
+
+    if not current_user.is_authenticated:
+
+        guest_uses = session.get("guest_uses", 0)
+
+        if guest_uses >= 1:
+            flash("Please login to continue diagnosing your car.")
+            return redirect("/login")
+
+        session["guest_uses"] = guest_uses + 1
+
+    if current_user.is_authenticated:
+        cars = Car.query.filter_by(owner_id=current_user.id).all()
+    else:
+        cars = []
+
 
     cars = Car.query.filter_by(owner_id=current_user.id).all()
 
@@ -567,7 +613,7 @@ def diagnose():
             if key not in ["problem", "car_id"]:
                 answers[key] = request.form.get(key)
 
-        results, questions = diagnose_vehicle(problem, answers)
+        results, questions = diagnose_vehicle(problem, answers, car)
 
         if results:
 
@@ -589,6 +635,8 @@ def diagnose():
         )
 
     return render_template("diagnose.html", cars=cars)
+
+
 # ================= CREATE POST =================
 
 @app.route("/create", methods=["GET", "POST"])
@@ -985,8 +1033,7 @@ def list_models():
         output.append(m.name)
     return {"models": output}
 
-
-# ================= DB INIT =================
+# ================= CREATE DB TABLES =================
  
 # ================= START SERVER =================
 

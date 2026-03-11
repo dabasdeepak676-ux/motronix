@@ -33,21 +33,23 @@
                 </div>
             {% endif %}
         {% endwith %}
-      <!-- Google Login -->
-<div class="google-login">
-    <a href="{{ url_for('google_login') }}" class="google-btn">
-        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
-        Continue with Google
-    </a>
-</div>
 
-<div class="divider">
-    <span>OR CONTINUE WITH EMAIL</span>
-</div>
+        <!-- Google Login -->
+        <div class="google-login">
+            <a href="/login/google" class="google-btn">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+                Continue with Google
+            </a>
+        </div>
+
+        <div class="divider">
+            <span>OR CONTINUE WITH EMAIL</span>
+        </div>
+
         <!-- AUTH FORM -->
         <form method="POST" autocomplete="off">
+
             
-            <!-- CSRF Token (Required) -->
 
             <!-- Username -->
             <input type="text"
@@ -74,12 +76,14 @@
             {% endif %}
 
         </form>
-         {% if request.path == "/login" %}
-            <p style="margin-top:15px;">
-                <a href="/forgot-password" class="forgot-btn">Reset Password</a>
-                </a>
-            </p>
+
+        <!-- Forgot Password -->
+        {% if request.path == "/login" %}
+        <p style="margin-top:15px;">
+            <a href="/forgot-password" class="forgot-btn">Reset Password</a>
+        </p>
         {% endif %}
+
     </div>
 
 </div>

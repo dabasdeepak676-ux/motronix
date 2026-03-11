@@ -27,9 +27,15 @@ def detect_components(problem_text):
         ],
 
         "steering":[
-            "steering","alignment","pulling",
-            "steering vibration","hard steering"
-        ],
+"steering",
+"alignment",
+"pulling",
+"car pulling",
+"pulling to one side",
+"vehicle pulling",
+"steering vibration",
+"hard steering"
+],
 
         "ac":[
             "ac","cooling","compressor",
@@ -41,15 +47,26 @@ def detect_components(problem_text):
             "fuel smell","fuel pressure"
         ],
 
-        "transmission":[
-            "gear","gearbox","shifting",
-            "gear slipping","clutch"
-        ],
-
-        "suspension":[
-            "shock","suspension","bump",
-            "clunk","wheel bearing","cv joint"
-        ],
+"transmission":[
+    "gear",
+    "gearbox",
+    "shifting",
+    "gear slipping",
+    "clutch"
+],
+"suspension":[
+    "shock",
+    "suspension",
+    "bump",
+    "clunk",
+    "wheel bearing",
+    "cv joint",
+    "car shaking",
+    "shaking while driving",
+    "vibration while driving",
+    "vehicle vibration",
+    "wheel vibration"
+],
 
         "ev":[
             "ev","battery pack","charging",
