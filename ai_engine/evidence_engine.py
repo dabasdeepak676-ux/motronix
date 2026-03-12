@@ -58,7 +58,7 @@ def adjust_scores(results, answers):
 
         for key, value in rules.items():
 
-            parts = key.split("_")
+            parts = key.rsplit("_", 1)
 
             if len(parts) == 2:
 

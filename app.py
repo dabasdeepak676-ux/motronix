@@ -483,8 +483,12 @@ def track_visit():
 
     try:
 
-        # ignore static files
+        # skip static files
         if request.path.startswith("/static"):
+            return
+
+        # skip auth routes (login / google callback)
+        if request.path.startswith("/login") or request.path.startswith("/google"):
             return
 
         visit = WebsiteVisit(
