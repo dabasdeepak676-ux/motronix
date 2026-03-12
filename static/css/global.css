@@ -1,5 +1,9 @@
 /* ================= GLOBAL ================= */
 
+*{
+box-sizing:border-box;
+}
+
 html{
 font-size:14px;
 }
@@ -10,7 +14,6 @@ font-family:Arial, Helvetica, sans-serif;
 background: radial-gradient(circle at top,#111 0%,#000 70%);
 color:white;
 line-height:1.35;
-zoom:0.90;
 }
 
 /* ================= CONTAINER ================= */
@@ -49,6 +52,7 @@ font-size:34px;
 font-weight:700;
 background:linear-gradient(90deg,#ff3b3b,#ff0000);
 -webkit-background-clip:text;
+background-clip:text;
 color:transparent;
 text-shadow:0 0 20px rgba(255,0,0,0.35);
 margin-bottom:4px;
@@ -151,7 +155,7 @@ border-color:#ff3b3b;
 transform:translateY(-1px);
 }
 
-/* ================= IMAGE (MASCOT) ================= */
+/* ================= IMAGE ================= */
 
 .mechanic-img{
 width:150px;
