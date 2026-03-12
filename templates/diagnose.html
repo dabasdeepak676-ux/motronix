@@ -1,105 +1,160 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<div class="auth-wrapper">
+<div class="diagnose-container">
 
-    <div class="auth-container">
+    <h1 class="hero-title">Motronix</h1>
+    <p class="hero-sub">Automotive Intelligence Simplified</p>
 
-        <h2 class="auth-title">AI Car Diagnosis</h2>
+    <div class="diagnose-card">
 
-        <form method="POST" class="auth-form">
+        <h2>Car Diagnose</h2>
+        <h3>Motronix AI Brain V1 - Beta</h3>
 
-            <!-- Select Car -->
+        {% if default_car %}
+        <p class="default-car">
+            Default Car: {{ default_car.brand }} {{ default_car.model }}
+        </p>
+        {% endif %}
+
+        <form method="POST">
+
+            {% if cars %}
             <select name="car_id" required>
+                {% for car in cars %}
+                <option value="{{ car.id }}">
+                    {{ car.brand }} {{ car.model }} ({{ car.year }})
+                </option>
+                {% endfor %}
+            </select>
+            {% endif %}
 
-<option value="">Select Your Car</option>
-<p>Selected Car: {{ car.brand }} {{ car.model }}</p>
-{% for car in cars %}
-<option value="{{ car.id }}">
-{{ car.brand }} {{ car.model }} ({{ car.year }})
-</option>
-{% endfor %}
+            <div class="autocomplete-wrapper">
 
-</select>
-
-
-            <!-- Problem Description -->
-            <div class="problem-wrapper">
-
-                <textarea
-                    id="problem"
+                <input
+                    type="text"
+                    id="problem-input"
                     name="problem"
-                    class="auth-input"
-                    placeholder="Describe your car problem (example: vibration while braking, car not starting, engine overheating)"
-                    style="height:120px"
-                    onkeyup="loadSuggestions()"
+                    placeholder="Describe your problem"
+                    autocomplete="off"
                     required
-                ></textarea>
+                >
 
-                <!-- Suggestions -->
-                <div id="suggestions" class="suggestion-box"></div>
+                <div id="suggestions-box"></div>
 
             </div>
 
-
-            <!-- Submit Button -->
-            <button type="submit" class="auth-button">
-                Diagnose Problem
+            <button type="submit">
+                Diagnose Now
             </button>
 
         </form>
+
+        <a href="/garage" class="my-cars-btn">
+            My Cars
+        </a>
 
     </div>
 
 </div>
 
-
 <script>
 
-async function loadSuggestions(){
+window.onload = function(){
 
-    const input = document.getElementById("problem")
-    const box = document.getElementById("suggestions")
+const input = document.getElementById("problem-input");
+const box = document.getElementById("suggestions-box");
 
-    const query = input.value.trim()
+input.addEventListener("input", function(){
 
-    if(query.length < 2){
-        box.innerHTML = ""
-        return
-    }
+let query = input.value.trim();
 
-    try{
+if(query.length < 2){
+box.innerHTML = "";
+return;
+}
 
-        const response = await fetch("/symptom-suggest?q=" + query)
+fetch("/symptom-suggest?q=" + encodeURIComponent(query))
+.then(res => res.json())
+.then(data => {
 
-        const data = await response.json()
+box.innerHTML = "";
 
-        box.innerHTML = ""
+data.suggestions.forEach(function(item){
 
-        data.suggestions.forEach(function(symptom){
+let div = document.createElement("div");
 
-            const div = document.createElement("div")
+div.className = "suggestion-item";
 
-            div.className = "suggestion-item"
-            div.innerText = symptom
+div.innerText = item;
 
-            div.onclick = function(){
+div.onclick = function(){
 
-                input.value = symptom
-                box.innerHTML = ""
+input.value = item;
 
-            }
+box.innerHTML = "";
 
-            box.appendChild(div)
+};
 
-        })
+box.appendChild(div);
 
-    }catch(error){
+});
 
-        console.error("Suggestion error:", error)
+});
 
-    }
+});
+
+}
+
+</script>
+<script>
+
+console.log("Motronix autocomplete loaded");
+
+const input = document.getElementById("problem-input");
+const box = document.getElementById("suggestions-box");
+
+if(input){
+
+input.addEventListener("keyup", function(){
+
+let query = input.value;
+
+if(query.length < 2){
+box.innerHTML="";
+return;
+}
+
+fetch("/symptom-suggest?q=" + query)
+
+.then(res => res.json())
+
+.then(data => {
+
+box.innerHTML="";
+
+data.suggestions.forEach(function(item){
+
+let div = document.createElement("div");
+
+div.className="suggestion-item";
+
+div.innerText=item;
+
+div.onclick=function(){
+
+input.value=item;
+box.innerHTML="";
+
+};
+
+box.appendChild(div);
+
+});
+
+});
+
+});
 
 }
 

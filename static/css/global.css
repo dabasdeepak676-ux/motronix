@@ -12,3 +12,47 @@ body {
     margin: 20px auto;   /* pehle 40px tha */
     padding: 0 20px;
 }
+#suggestions-box{
+    background:#111;
+    border:1px solid #333;
+    border-radius:6px;
+    margin-top:5px;
+    max-height:200px;
+    overflow-y:auto;
+}
+
+.suggestion-item{
+    padding:10px;
+    cursor:pointer;
+    color:white;
+}
+
+.suggestion-item:hover{
+    background:#ff2a2a;
+}
+/* AUTOCOMPLETE */
+
+.autocomplete-wrapper{
+position:relative;
+}
+
+#suggestions-box{
+position:absolute;
+width:100%;
+background:#111;
+border:1px solid #333;
+border-radius:6px;
+max-height:200px;
+overflow-y:auto;
+z-index:999;
+}
+
+.suggestion-item{
+padding:10px;
+cursor:pointer;
+color:white;
+}
+
+.suggestion-item:hover{
+background:#ff2a2a;
+}

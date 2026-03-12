@@ -483,11 +483,9 @@ def track_visit():
 
     try:
 
-        # skip static files
         if request.path.startswith("/static"):
             return
 
-        # skip auth routes (login / google callback)
         if request.path.startswith("/login") or request.path.startswith("/google"):
             return
 
@@ -499,7 +497,8 @@ def track_visit():
         db.session.commit()
 
     except Exception as e:
-        pass
+
+        db.session.rollback()
 
 
 # ================= ADD CAR =================
@@ -1038,7 +1037,8 @@ def list_models():
     return {"models": output}
 
 # ================= CREATE DB TABLES =================
- 
+    with app.app_context():
+     db.create_all()
 # ================= START SERVER =================
 
 if __name__ == "__main__":
