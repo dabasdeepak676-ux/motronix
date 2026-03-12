@@ -236,5 +236,87 @@ cursor:pointer;
 font-size:12px;
 color:#aaa;
 }
+/* ===== PROFILE DROPDOWN ===== */
+
+.user-dropdown a{
+
+display:flex;
+align-items:center;
+padding:10px 14px;
+color:#ddd;
+text-decoration:none;
+font-size:14px;
+gap:10px;
+transition:0.2s;
+
+}
+
+/* icon */
+
+.user-dropdown a i{
+
+width:16px;
+font-size:14px;
+color:#ff3b3b;
+
+}
+
+/* hover */
+
+.user-dropdown a:hover{
+
+background:#1a1a1a;
+color:white;
+
+}
+
+.user-dropdown a:hover i{
+
+color:#ff3b3b;
+
+}
+
+/* divider */
+
+.dropdown-divider{
+
+height:1px;
+background:#222;
+margin:6px 0;
+
+}
+/* ===== PROFILE DROPDOWN FIX ===== */
+
+.user-dropdown{
+min-width:180px;
+}
+
+.user-dropdown a{
+display:flex;
+align-items:center;
+gap:10px;
+padding:10px 14px;
+color:#ddd;
+text-decoration:none;
+font-size:14px;
+}
+
+.user-dropdown a i{
+width:16px;
+text-align:center;
+font-size:14px;
+color:#ff3b3b;
+}
+
+.user-dropdown a:hover{
+background:#1a1a1a;
+color:white;
+}
+
+.dropdown-divider{
+height:1px;
+background:#222;
+margin:6px 0;
+}
 
 

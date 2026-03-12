@@ -106,16 +106,17 @@ justify-content:center;
 max-width:1200px;
 margin:0 auto;
 padding:0 20px;
-gap:60px;
+gap:36px; /* was 60 */
 position:relative;
 z-index:1;
 }
+
 /* ================= HERO LEFT ================= */
 
 .hero-left{
 display:flex;
 flex-direction:column;
-gap:24px;
+gap:16px; /* was 24 */
 max-width:520px;
 z-index:2;
 }
@@ -137,7 +138,7 @@ box-shadow:0 0 40px rgba(255,0,0,0.15);
 display:flex;
 align-items:center;
 justify-content:center;
-gap:40px;
+gap:36px;
 flex-wrap:wrap;
 }
 
@@ -168,7 +169,7 @@ object-fit:contain;
 .hero-features{
 display:flex;
 flex-direction:column;
-gap:30px;
+gap:18px; /* was 30 */
 width:300px;
 }
 
@@ -208,9 +209,9 @@ box-shadow:0 0 30px rgba(255,0,0,0.45);
 .premium-section{
 display:flex;
 justify-content:center;
-gap:50px;
+gap:26px; /* was 50 */
 max-width:1000px;
-margin:40px auto;
+margin:28px auto; /* was 40 */
 text-align:center;
 flex-wrap:wrap;
 }
@@ -238,7 +239,7 @@ gap:10px;
 /* ================= AI BADGE ================= */
 
 .ai-promo-badge{
-margin-top:35px;
+margin-top:20px; /* was 35 */
 background:linear-gradient(90deg,#ff3c3c,#b30000);
 padding:14px 32px;
 border-radius:40px;
@@ -442,6 +443,7 @@ margin-top:20px;
 }
 
 }
+
 .glow-text{
 margin-top:-10px;
 }

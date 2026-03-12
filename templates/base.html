@@ -3,19 +3,18 @@
 <head>
 
 <title>Motronix - Automotive Intelligence Simplified</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/ai.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hero.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/community.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ai.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/hero.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
 <body>
@@ -63,32 +62,40 @@
 <div class="user-dropdown" id="userMenu">
 
 <a href="/profile">
-<i class="fa-solid fa-user"></i> Profile
+<i class="fa-solid fa-user"></i>
+Profile
 </a>
 
 <a href="/contact">
-<i class="fa-solid fa-envelope"></i> Contact
+<i class="fa-solid fa-envelope"></i>
+Contact
 </a>
 
 <div class="dropdown-divider"></div>
 
 <a href="/privacy">
-<i class="fa-solid fa-shield-halved"></i> Privacy Policy
+<i class="fa-solid fa-shield-halved"></i>
+Privacy Policy
 </a>
 
 <a href="/terms">
-<i class="fa-solid fa-file-contract"></i> Terms of Service
+<i class="fa-solid fa-file-contract"></i>
+Terms of Service
 </a>
 
 <a href="/disclaimer">
-<i class="fa-solid fa-circle-exclamation"></i> Disclaimer
+<i class="fa-solid fa-circle-exclamation"></i>
+Disclaimer
 </a>
 
 <div class="dropdown-divider"></div>
 
 <a href="{{ url_for('auth.logout') }}">
-<i class="fa-solid fa-right-from-bracket"></i> Logout
+<i class="fa-solid fa-right-from-bracket"></i>
+Logout
 </a>
+
+</div>
 
 <link rel="stylesheet" href="/static/css/news.css">
 </div>

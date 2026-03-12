@@ -37,8 +37,6 @@ Default Car:
 
 <div class="autocomplete-wrapper">
 
-<div class="autocomplete-wrapper">
-
 <input
 type="text"
 id="problem-input"
@@ -58,6 +56,22 @@ Diagnose Now
 </button>
 
 </form>
+
+<section class="popular-problems">
+
+<h3>Popular Problems</h3>
+
+<div class="problem-buttons">
+
+<button onclick="fillProblem('car not starting')">Car not starting</button>
+<button onclick="fillProblem('engine vibration')">Engine vibration</button>
+<button onclick="fillProblem('brake noise')">Brake noise</button>
+<button onclick="fillProblem('ac not cooling')">AC not cooling</button>
+<button onclick="fillProblem('steering vibration')">Steering vibration</button>
+
+</div>
+
+</section>
 
 <div class="car-actions">
 <a href="/garage" class="outline-btn">
@@ -103,11 +117,7 @@ Create Account
 </div>
 
 
-<!-- RIGHT SIDE -->
-
 <div class="hero-right">
-
-<!-- SPEED16 BRANDING -->
 
 <div class="speed16-hero">
 
@@ -133,9 +143,7 @@ Founded by Ritesh — Engineer & Automotive Influencer
 
 </div>
 
-
 <img src="{{ url_for('static', filename='images/mechanic.PNG') }}" class="mechanic-img">
-
 
 <div class="hero-features">
 
@@ -160,6 +168,82 @@ Founded by Ritesh — Engineer & Automotive Influencer
 
 </section>
 
+
+<!-- ================= EXPLORE MOTRONIX ================= -->
+
+<section class="explore-section">
+
+<h2 class="explore-title">Explore Motronix</h2>
+
+<div class="explore-grid">
+
+<div class="explore-card">
+
+<h3>Trending Discussions</h3>
+
+{% if trending_posts %}
+{% for post in trending_posts[:3] %}
+
+<a href="/community" class="explore-item">
+{{ post.title }}
+</a>
+
+{% endfor %}
+{% else %}
+
+<p>No discussions yet</p>
+
+{% endif %}
+
+<a href="/community" class="outline-btn small">
+View All →
+</a>
+
+</div>
+
+
+<div class="explore-card">
+
+<h3>Latest Automotive News</h3>
+
+{% for item in news_items[:3] %}
+
+<a href="/news/{{ item.id }}" class="explore-item">
+{{ item.title }}
+</a>
+
+{% endfor %}
+
+<a href="/news" class="outline-btn small">
+Read More →
+</a>
+
+</div>
+
+
+<div class="explore-card">
+
+<h3>Learn from Videos</h3>
+
+{% for video in videos[:2] %}
+
+<iframe
+src="{{ video }}"
+frameborder="0"
+allowfullscreen>
+</iframe>
+
+{% endfor %}
+
+<a href="/videos" class="outline-btn small">
+Watch More →
+</a>
+
+</div>
+
+</div>
+
+</section>
 
 
 <section class="premium-section fade-section">
@@ -191,6 +275,8 @@ Passionate about simplifying the automotive ecosystem for smarter decisions.
 </p>
 
 </section>
+
+
 <script>
 
 const input = document.getElementById("problem-input");
@@ -216,16 +302,12 @@ box.innerHTML="";
 data.suggestions.forEach(function(item){
 
 let div=document.createElement("div");
-
 div.className="suggestion-item";
-
 div.innerText=item;
 
 div.onclick=function(){
-
 input.value=item;
 box.innerHTML="";
-
 };
 
 box.appendChild(div);
@@ -236,6 +318,15 @@ box.appendChild(div);
 
 });
 
+}
+
+</script>
+
+
+<script>
+
+function fillProblem(problem){
+document.getElementById("problem-input").value = problem;
 }
 
 </script>

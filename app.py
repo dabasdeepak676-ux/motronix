@@ -399,10 +399,37 @@ def home():
         cars = []
         default_car = None
 
+
+    # ===== TRENDING POSTS =====
+
+    trending_posts = Post.query.order_by(
+    Post.id.desc()
+    ).limit(5).all()
+
+
+    # ===== NEWS =====
+
+    news_items = News.query.order_by(
+        News.id.desc()
+    ).limit(5).all()
+
+
+    # ===== VIDEOS =====
+
+    videos = [
+        "https://www.youtube.com/embed/VIDEO_ID_1",
+        "https://www.youtube.com/embed/VIDEO_ID_2",
+        "https://www.youtube.com/embed/VIDEO_ID_3"
+    ]
+
+
     return render_template(
         "home.html",
         default_car=default_car,
-        cars=cars
+        cars=cars,
+        trending_posts=trending_posts,
+        news_items=news_items,
+        videos=videos
     )
 
 
@@ -717,7 +744,7 @@ def symptom_suggest():
 
 @app.route("/news")
 def news_list():
-    news_items = News.query.order_by(News.created_at.desc()).all()
+    news_items = News.query.order_by(News.id.desc()).all()
     return render_template("news.html", news_items=news_items)
 
 
@@ -1037,8 +1064,9 @@ def list_models():
     return {"models": output}
 
 # ================= CREATE DB TABLES =================
-    with app.app_context():
-     db.create_all()
+
+with app.app_context():
+    db.create_all()
 # ================= START SERVER =================
 
 if __name__ == "__main__":
